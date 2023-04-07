@@ -1,0 +1,66 @@
+private: System::Void richTextBox2_MouseDoubleClick(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e) {
+	if (openFileDialog1->ShowDialog() == DialogResult::OK)
+	{
+		// получаем выбранный файл
+		String^ filename = openFileDialog1->FileName;
+		const char* ptr = (const char*)(Marshal::StringToHGlobalAnsi(filename)).ToPointer();
+		std::string temp = rle->ReadFile(std::string(ptr));
+		richTextBox2->Text = gcnew System::String(temp.c_str());
+	}
+}
+
+private: System::Void richTextBox1_MouseDoubleClick(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e) {
+	if (openFileDialog1->ShowDialog() == DialogResult::OK)
+	{
+		// получаем выбранный файл
+		String^ filename = openFileDialog1->FileName;
+		const char* ptr = (const char*)(Marshal::StringToHGlobalAnsi(filename)).ToPointer();
+		std::string temp = rle->ReadFile(std::string(ptr));
+		richTextBox1->Text = gcnew System::String(temp.c_str());
+	}
+}
+
+private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e) {
+	String^ filename = openFileDialog1->FileName;
+	const char* ptr = (const char*)(Marshal::StringToHGlobalAnsi(filename)).ToPointer();
+	//if (saveFileDialog1->ShowDialog() == DialogResult::OK)
+	//{
+	//	String^ filenamesave = saveFileDialog1->FileName;
+	//	String^ Text = richTextBox2->Text;
+	//	const char* _ptr = (const char*)(Marshal::StringToHGlobalAnsi(filenamesave)).ToPointer();
+	//	rle->RLE_Compress(std::string(ptr), std::string(_ptr));
+	//	std::string temp = rle->ReadFile(std::string(_ptr));
+	//	richTextBox2->Text = gcnew System::String(temp.c_str());
+	//}
+	if (saveFileDialog1->ShowDialog() == DialogResult::OK)
+	{
+		String^ filenamesave = saveFileDialog1->FileName;
+		String^ Text = richTextBox1->Text;
+		const char* _ptr = (const char*)(Marshal::StringToHGlobalAnsi(filenamesave)).ToPointer();
+		lzw->LZW_Compress(std::string(ptr), std::string(_ptr));
+		std::string temp = rle->ReadFile(std::string(_ptr));
+		richTextBox1->Text = gcnew System::String(temp.c_str());
+	}
+}
+
+private: System::Void richTextBox2_Leave(System::Object^ sender, System::EventArgs^ e) {
+	if (openFileDialog1->ShowDialog() == DialogResult::OK)
+	{
+		// получаем выбранный файл
+		String^ filename = openFileDialog1->FileName;
+		const char* ptr = (const char*)(Marshal::StringToHGlobalAnsi(filename)).ToPointer();
+		std::string temp = rle->ReadFile(std::string(ptr));
+		richTextBox2->Text = gcnew System::String(temp.c_str());
+	}
+}
+
+private: System::Void richTextBox1_Leave(System::Object^ sender, System::EventArgs^ e) {
+	if (openFileDialog1->ShowDialog() == DialogResult::OK)
+	{
+		// получаем выбранный файл
+		String^ filename = openFileDialog1->FileName;
+		const char* ptr = (const char*)(Marshal::StringToHGlobalAnsi(filename)).ToPointer();
+		std::string temp = rle->ReadFile(std::string(ptr));
+		richTextBox1->Text = gcnew System::String(temp.c_str());
+	}
+}

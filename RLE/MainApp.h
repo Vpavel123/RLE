@@ -20,15 +20,37 @@ namespace RLE {
 	public ref class MainApp : public System::Windows::Forms::Form
 	{
 	public:
+		PageFile^ file;
+		PageImage^ image;
+		PageGeneral^ general;
+
 		MainApp(void)
 		{
 			InitializeComponent();
 			//
 			//TODO: добавьте код конструктора
 			//
+
+			image = gcnew PageImage();
+			general = gcnew PageGeneral();
+			file = gcnew PageFile(general);
+
+			this->radioButton1->FlatAppearance->MouseOverBackColor = System::Drawing::Color().FromArgb(33, 150, 243);
+			this->radioButton4->FlatAppearance->MouseOverBackColor = System::Drawing::Color().FromArgb(33, 150, 243);
+			this->radioButton5->FlatAppearance->MouseOverBackColor = System::Drawing::Color().FromArgb(33, 150, 243);
+			this->radioButton6->FlatAppearance->MouseOverBackColor = System::Drawing::Color().FromArgb(33, 150, 243);
+
+			this->radioButton1->FlatAppearance->CheckedBackColor = System::Drawing::Color().FromArgb(33, 150, 243);
+			this->radioButton4->FlatAppearance->CheckedBackColor = System::Drawing::Color().FromArgb(33, 150, 243);
+			this->radioButton5->FlatAppearance->CheckedBackColor = System::Drawing::Color().FromArgb(33, 150, 243);
+			this->radioButton6->FlatAppearance->CheckedBackColor = System::Drawing::Color().FromArgb(33, 150, 243);
+
 			this->radioButton1->Image = Image::FromFile("Image/file_30px.png");
 			this->radioButton5->Image = Image::FromFile("Image/image_gallery_30px.png");
 			this->radioButton4->Image = Image::FromFile("Image/settings_30px.png");
+			this->radioButton6->Image = Image::FromFile("Image/graph_30px.png");
+			this->ExitButton->Image = Image::FromFile("Image/close_30px.png");
+
 			this->panel1->BackColor = System::Drawing::Color().FromArgb(33, 150, 243);
 			this->panel2->BackColor = System::Drawing::Color().FromArgb(24, 105, 169);
 			this->panel3->BackColor = System::Drawing::Color().FromArgb(51, 51, 77);
@@ -62,6 +84,7 @@ namespace RLE {
 	private: System::Windows::Forms::Panel^ panel3;
 	private: System::Windows::Forms::Label^ label1;
 	private: System::Windows::Forms::RadioButton^ radioButton4;
+	private: System::Windows::Forms::Button^ ExitButton;
 
 
 
@@ -102,6 +125,7 @@ namespace RLE {
 			this->panel2 = (gcnew System::Windows::Forms::Panel());
 			this->PagePanelControl = (gcnew System::Windows::Forms::Panel());
 			this->panel1 = (gcnew System::Windows::Forms::Panel());
+			this->ExitButton = (gcnew System::Windows::Forms::Button());
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->panel3 = (gcnew System::Windows::Forms::Panel());
 			this->SideBarPanel->SuspendLayout();
@@ -173,9 +197,19 @@ namespace RLE {
 			// panel1
 			// 
 			this->panel1->BackColor = System::Drawing::SystemColors::InfoText;
+			this->panel1->Controls->Add(this->ExitButton);
 			this->panel1->Controls->Add(this->label1);
 			resources->ApplyResources(this->panel1, L"panel1");
 			this->panel1->Name = L"panel1";
+			// 
+			// ExitButton
+			// 
+			this->ExitButton->FlatAppearance->BorderSize = 0;
+			this->ExitButton->FlatAppearance->MouseOverBackColor = System::Drawing::Color::Transparent;
+			resources->ApplyResources(this->ExitButton, L"ExitButton");
+			this->ExitButton->Name = L"ExitButton";
+			this->ExitButton->UseVisualStyleBackColor = true;
+			this->ExitButton->Click += gcnew System::EventHandler(this, &MainApp::ExitButton_Click);
 			// 
 			// label1
 			// 
@@ -208,20 +242,23 @@ namespace RLE {
 		}
 #pragma endregion
 	private: System::Void MainApp_Load(System::Object^ sender, System::EventArgs^ e) {
-		PagePanelControl->Controls->Add(gcnew PageGeneral);
+		PagePanelControl->Controls->Add(general);
 		label1->Text = "Settings";
 	}
 	private: System::Void radioButton6_Click(System::Object^ sender, System::EventArgs^ e) {
-		Application::Exit();
+
 	}
 	private: System::Void radioButton5_Enter(System::Object^ sender, System::EventArgs^ e) {
-		NavigationService::getInstance()->Navigate("Image", label1, gcnew PageImage(), PagePanelControl);
+		NavigationService::getInstance()->Navigate("Image", label1, image, PagePanelControl);
 	}
 	private: System::Void radioButton4_Enter(System::Object^ sender, System::EventArgs^ e) {
-		NavigationService::getInstance()->Navigate("Settings", label1, gcnew PageGeneral(), PagePanelControl);
+		NavigationService::getInstance()->Navigate("Settings", label1, general, PagePanelControl);
 	}	
 	private: System::Void radioButton1_Enter(System::Object^ sender, System::EventArgs^ e) {
-		NavigationService::getInstance()->Navigate("File", label1, gcnew PageFile(), PagePanelControl);
+		NavigationService::getInstance()->Navigate("File", label1, file, PagePanelControl);
+	}
+	private: System::Void ExitButton_Click(System::Object^ sender, System::EventArgs^ e) {
+		Application::Exit();
 	}
 
 };

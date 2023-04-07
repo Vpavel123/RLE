@@ -119,18 +119,22 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Messaging" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="LZW.cpp" />
     <ClCompile Include="MainApp.cpp" />
     <ClCompile Include="NavigationService.cpp" />
     <ClCompile Include="PageFile.cpp" />
     <ClCompile Include="PageGeneral.cpp" />
     <ClCompile Include="PageImage.cpp" />
     <ClCompile Include="PageSideBar.cpp" />
+    <ClCompile Include="RLEencryption.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="LZW.h" />
     <ClInclude Include="MainApp.h">
       <FileType>CppForm</FileType>
     </ClInclude>
@@ -147,6 +151,7 @@
     <ClInclude Include="PageSideBar.h">
       <FileType>CppControl</FileType>
     </ClInclude>
+    <ClInclude Include="RLEencryption.h" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="MainApp.resx">
