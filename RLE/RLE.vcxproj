@@ -121,31 +121,34 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Messaging" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Windows.Forms.DataVisualization" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Huffman.cpp" />
     <ClCompile Include="LZW.cpp" />
     <ClCompile Include="MainApp.cpp" />
     <ClCompile Include="NavigationService.cpp" />
+    <ClCompile Include="PageAnalysis.cpp" />
     <ClCompile Include="PageFile.cpp" />
     <ClCompile Include="PageGeneral.cpp" />
-    <ClCompile Include="PageImage.cpp" />
     <ClCompile Include="PageSideBar.cpp" />
     <ClCompile Include="RLEencryption.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Huffman.h" />
     <ClInclude Include="LZW.h" />
     <ClInclude Include="MainApp.h">
       <FileType>CppForm</FileType>
     </ClInclude>
     <ClInclude Include="NavigationService.h" />
+    <ClInclude Include="PageAnalysis.h">
+      <FileType>CppControl</FileType>
+    </ClInclude>
     <ClInclude Include="PageFile.h">
       <FileType>CppControl</FileType>
     </ClInclude>
     <ClInclude Include="PageGeneral.h">
-      <FileType>CppControl</FileType>
-    </ClInclude>
-    <ClInclude Include="PageImage.h">
       <FileType>CppControl</FileType>
     </ClInclude>
     <ClInclude Include="PageSideBar.h">
@@ -157,14 +160,14 @@
     <EmbeddedResource Include="MainApp.resx">
       <DependentUpon>MainApp.h</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="PageAnalysis.resx">
+      <DependentUpon>PageAnalysis.h</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="PageFile.resx">
       <DependentUpon>PageFile.h</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PageGeneral.resx">
       <DependentUpon>PageGeneral.h</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="PageImage.resx">
-      <DependentUpon>PageImage.h</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PageSideBar.resx">
       <DependentUpon>PageSideBar.h</DependentUpon>

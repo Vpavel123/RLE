@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <string>
 #include "PageGeneral.h"
+#include "PageAnalysis.h"
 #include "LZW.h"
 #include "RLEencryption.h"
 
@@ -23,11 +24,7 @@ namespace RLE {
 	public ref class PageFile : public System::Windows::Forms::UserControl
 	{
 	public:
-		PageGeneral^ general;
-
-
 	public:
-		LZW* lzw;
 	private: System::Windows::Forms::TreeView^ treeView1;
 	private: System::Windows::Forms::ListView^ listView1;
 	private: System::Windows::Forms::RichTextBox^ richTextBox1;
@@ -53,22 +50,37 @@ namespace RLE {
 	private: System::Windows::Forms::ColumnHeader^ columnHeader3;
 	private: System::Windows::Forms::ImageList^ imageList1;
 	private: System::Windows::Forms::ImageList^ imageList2;
+	private: System::Windows::Forms::ContextMenuStrip^ contextMenuStrip1;
+	private: System::Windows::Forms::ToolStripMenuItem^ CompressToolStripMenuItem;
+
+	private: System::Windows::Forms::ToolStripMenuItem^ расжатьToolStripMenuItem;
+
 	public:
 
 	public:
 		RLEencryption* rle;
-		PageFile(PageGeneral^ general)
+		LZW* lzw;
+		PageGeneral^ general;
+		PageAnalysis^ analysis;
+
+		void UserControl1_ComboBoxTextChanged(System::Object^ sender, System::String^ text)
+		{
+			aboutToolStripMenuItem->Text = text;
+		}
+
+		PageFile(PageGeneral^ general, PageAnalysis^ analysis)
 		{
 			InitializeComponent();
 			//
 			//TODO: добавьте код конструктора
 			//
+			this->analysis = analysis;
 			this->general = general;
 			lzw = new LZW();
 			rle = new RLEencryption();
 			openFileDialog1->Filter = "Text files(*.txt)|*.txt|All files(*.*)|*.*";
 			saveFileDialog1->Filter = "Text files(*.txt)|*.txt|All files(*.*)|*.*";
-			//label2->Text = general->Controls->Find("comboBox2", true)[0]->Text;
+			menuStrip1->BackColor = System::Drawing::Color().FromArgb(51, 51, 77); 
 		}
 
 		PageFile(void)
@@ -80,7 +92,12 @@ namespace RLE {
 			rle = new RLEencryption();
 			openFileDialog1->Filter = "Text files(*.txt)|*.txt|All files(*.*)|*.*";
 			saveFileDialog1->Filter = "Text files(*.txt)|*.txt|All files(*.*)|*.*";
-			//label2->Text = parentForm->general->Controls->Find("comboBox2", true)[0]->Text;
+		}
+
+	private:
+		System::Void OnComboBoxTextChanged(System::String^ text)
+		{
+			aboutToolStripMenuItem->Text = text;
 		}
 
 	protected:
@@ -95,7 +112,7 @@ namespace RLE {
 			}
 		}
 	private: System::Windows::Forms::OpenFileDialog^ openFileDialog1;
-	private: System::Windows::Forms::Button^ SaveButton;
+
 
 
 
@@ -132,13 +149,15 @@ namespace RLE {
 		{
 			this->components = (gcnew System::ComponentModel::Container());
 			this->openFileDialog1 = (gcnew System::Windows::Forms::OpenFileDialog());
-			this->SaveButton = (gcnew System::Windows::Forms::Button());
 			this->saveFileDialog1 = (gcnew System::Windows::Forms::SaveFileDialog());
 			this->treeView1 = (gcnew System::Windows::Forms::TreeView());
 			this->listView1 = (gcnew System::Windows::Forms::ListView());
 			this->columnHeader1 = (gcnew System::Windows::Forms::ColumnHeader());
 			this->columnHeader2 = (gcnew System::Windows::Forms::ColumnHeader());
 			this->columnHeader3 = (gcnew System::Windows::Forms::ColumnHeader());
+			this->contextMenuStrip1 = (gcnew System::Windows::Forms::ContextMenuStrip(this->components));
+			this->CompressToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->расжатьToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->imageList2 = (gcnew System::Windows::Forms::ImageList(this->components));
 			this->richTextBox1 = (gcnew System::Windows::Forms::RichTextBox());
 			this->menuStrip1 = (gcnew System::Windows::Forms::MenuStrip());
@@ -157,6 +176,7 @@ namespace RLE {
 			this->aboutToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->toolStrip1 = (gcnew System::Windows::Forms::ToolStrip());
 			this->imageList1 = (gcnew System::Windows::Forms::ImageList(this->components));
+			this->contextMenuStrip1->SuspendLayout();
 			this->menuStrip1->SuspendLayout();
 			this->SuspendLayout();
 			// 
@@ -164,26 +184,11 @@ namespace RLE {
 			// 
 			this->openFileDialog1->FileName = L"openFileDialog1";
 			// 
-			// SaveButton
-			// 
-			this->SaveButton->BackColor = System::Drawing::Color::DeepSkyBlue;
-			this->SaveButton->FlatAppearance->BorderSize = 0;
-			this->SaveButton->FlatStyle = System::Windows::Forms::FlatStyle::Flat;
-			this->SaveButton->Font = (gcnew System::Drawing::Font(L"Calibri", 16));
-			this->SaveButton->ForeColor = System::Drawing::SystemColors::Desktop;
-			this->SaveButton->Location = System::Drawing::Point(80, 403);
-			this->SaveButton->Name = L"SaveButton";
-			this->SaveButton->Size = System::Drawing::Size(188, 52);
-			this->SaveButton->TabIndex = 1;
-			this->SaveButton->Text = L"Crypt";
-			this->SaveButton->UseVisualStyleBackColor = false;
-			this->SaveButton->Click += gcnew System::EventHandler(this, &PageFile::button1_Click);
-			// 
 			// treeView1
 			// 
-			this->treeView1->Location = System::Drawing::Point(3, 31);
+			this->treeView1->Location = System::Drawing::Point(3, 40);
 			this->treeView1->Name = L"treeView1";
-			this->treeView1->Size = System::Drawing::Size(223, 366);
+			this->treeView1->Size = System::Drawing::Size(223, 409);
 			this->treeView1->TabIndex = 2;
 			this->treeView1->BeforeExpand += gcnew System::Windows::Forms::TreeViewCancelEventHandler(this, &PageFile::treeView1_BeforeExpand);
 			this->treeView1->AfterSelect += gcnew System::Windows::Forms::TreeViewEventHandler(this, &PageFile::treeView1_AfterSelect);
@@ -195,18 +200,20 @@ namespace RLE {
 				this->columnHeader1, this->columnHeader2,
 					this->columnHeader3
 			});
+			this->listView1->ContextMenuStrip = this->contextMenuStrip1;
 			this->listView1->HideSelection = false;
 			this->listView1->LabelEdit = true;
 			this->listView1->LargeImageList = this->imageList2;
-			this->listView1->Location = System::Drawing::Point(232, 31);
+			this->listView1->Location = System::Drawing::Point(232, 40);
 			this->listView1->Name = L"listView1";
-			this->listView1->Size = System::Drawing::Size(511, 252);
+			this->listView1->Size = System::Drawing::Size(511, 295);
 			this->listView1->SmallImageList = this->imageList2;
 			this->listView1->TabIndex = 3;
 			this->listView1->UseCompatibleStateImageBehavior = false;
 			this->listView1->View = System::Windows::Forms::View::Details;
 			this->listView1->AfterLabelEdit += gcnew System::Windows::Forms::LabelEditEventHandler(this, &PageFile::listView1_AfterLabelEdit);
 			this->listView1->ItemActivate += gcnew System::EventHandler(this, &PageFile::listView1_ItemActivate);
+			this->listView1->ItemSelectionChanged += gcnew System::Windows::Forms::ListViewItemSelectionChangedEventHandler(this, &PageFile::listView1_ItemSelectionChanged);
 			// 
 			// columnHeader1
 			// 
@@ -220,6 +227,30 @@ namespace RLE {
 			// 
 			this->columnHeader3->Text = L"Изменен";
 			// 
+			// contextMenuStrip1
+			// 
+			this->contextMenuStrip1->ImageScalingSize = System::Drawing::Size(20, 20);
+			this->contextMenuStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(2) {
+				this->CompressToolStripMenuItem,
+					this->расжатьToolStripMenuItem
+			});
+			this->contextMenuStrip1->Name = L"contextMenuStrip1";
+			this->contextMenuStrip1->Size = System::Drawing::Size(135, 52);
+			// 
+			// CompressToolStripMenuItem
+			// 
+			this->CompressToolStripMenuItem->Name = L"CompressToolStripMenuItem";
+			this->CompressToolStripMenuItem->Size = System::Drawing::Size(134, 24);
+			this->CompressToolStripMenuItem->Text = L"Сжать";
+			this->CompressToolStripMenuItem->Click += gcnew System::EventHandler(this, &PageFile::CompressToolStripMenuItem_Click);
+			// 
+			// расжатьToolStripMenuItem
+			// 
+			this->расжатьToolStripMenuItem->Name = L"расжатьToolStripMenuItem";
+			this->расжатьToolStripMenuItem->Size = System::Drawing::Size(134, 24);
+			this->расжатьToolStripMenuItem->Text = L"Расжать";
+			this->расжатьToolStripMenuItem->Click += gcnew System::EventHandler(this, &PageFile::расжатьToolStripMenuItem_Click);
+			// 
 			// imageList2
 			// 
 			this->imageList2->ColorDepth = System::Windows::Forms::ColorDepth::Depth8Bit;
@@ -228,7 +259,7 @@ namespace RLE {
 			// 
 			// richTextBox1
 			// 
-			this->richTextBox1->Location = System::Drawing::Point(232, 289);
+			this->richTextBox1->Location = System::Drawing::Point(232, 341);
 			this->richTextBox1->Name = L"richTextBox1";
 			this->richTextBox1->Size = System::Drawing::Size(511, 108);
 			this->richTextBox1->TabIndex = 4;
@@ -236,7 +267,7 @@ namespace RLE {
 			// 
 			// menuStrip1
 			// 
-			this->menuStrip1->BackColor = System::Drawing::Color::LightSkyBlue;
+			this->menuStrip1->BackColor = System::Drawing::Color::Black;
 			this->menuStrip1->ImageScalingSize = System::Drawing::Size(20, 20);
 			this->menuStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(2) {
 				this->fileToolStripMenuItem,
@@ -244,7 +275,7 @@ namespace RLE {
 			});
 			this->menuStrip1->Location = System::Drawing::Point(0, 0);
 			this->menuStrip1->Name = L"menuStrip1";
-			this->menuStrip1->Size = System::Drawing::Size(746, 28);
+			this->menuStrip1->Size = System::Drawing::Size(746, 37);
 			this->menuStrip1->TabIndex = 5;
 			this->menuStrip1->Text = L"menuStrip1";
 			// 
@@ -255,8 +286,10 @@ namespace RLE {
 					this->deleteToolStripMenuItem, this->toolStripSeparator1, this->renameToolStripMenuItem, this->moveToolStripMenuItem, this->copyToolStripMenuItem,
 					this->pasteToolStripMenuItem
 			});
+			this->fileToolStripMenuItem->Font = (gcnew System::Drawing::Font(L"Calibri", 14));
+			this->fileToolStripMenuItem->ForeColor = System::Drawing::SystemColors::Control;
 			this->fileToolStripMenuItem->Name = L"fileToolStripMenuItem";
-			this->fileToolStripMenuItem->Size = System::Drawing::Size(59, 24);
+			this->fileToolStripMenuItem->Size = System::Drawing::Size(81, 33);
 			this->fileToolStripMenuItem->Text = L"Файл";
 			// 
 			// createToolStripMenuItem
@@ -266,53 +299,53 @@ namespace RLE {
 					this->textFileToolStripMenuItem
 			});
 			this->createToolStripMenuItem->Name = L"createToolStripMenuItem";
-			this->createToolStripMenuItem->Size = System::Drawing::Size(204, 26);
+			this->createToolStripMenuItem->Size = System::Drawing::Size(263, 34);
 			this->createToolStripMenuItem->Text = L"Создать";
 			// 
 			// folderToolStripMenuItem
 			// 
 			this->folderToolStripMenuItem->Name = L"folderToolStripMenuItem";
-			this->folderToolStripMenuItem->Size = System::Drawing::Size(204, 26);
+			this->folderToolStripMenuItem->Size = System::Drawing::Size(263, 34);
 			this->folderToolStripMenuItem->Text = L"Папку";
 			this->folderToolStripMenuItem->Click += gcnew System::EventHandler(this, &PageFile::folderToolStripMenuItem_Click);
 			// 
 			// textFileToolStripMenuItem
 			// 
 			this->textFileToolStripMenuItem->Name = L"textFileToolStripMenuItem";
-			this->textFileToolStripMenuItem->Size = System::Drawing::Size(204, 26);
+			this->textFileToolStripMenuItem->Size = System::Drawing::Size(263, 34);
 			this->textFileToolStripMenuItem->Text = L"Текстовый файл";
 			this->textFileToolStripMenuItem->Click += gcnew System::EventHandler(this, &PageFile::textFileToolStripMenuItem_Click);
 			// 
 			// deleteToolStripMenuItem
 			// 
 			this->deleteToolStripMenuItem->Name = L"deleteToolStripMenuItem";
-			this->deleteToolStripMenuItem->Size = System::Drawing::Size(204, 26);
+			this->deleteToolStripMenuItem->Size = System::Drawing::Size(263, 34);
 			this->deleteToolStripMenuItem->Text = L"Удалить";
 			this->deleteToolStripMenuItem->Click += gcnew System::EventHandler(this, &PageFile::deleteToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator1
 			// 
 			this->toolStripSeparator1->Name = L"toolStripSeparator1";
-			this->toolStripSeparator1->Size = System::Drawing::Size(201, 6);
+			this->toolStripSeparator1->Size = System::Drawing::Size(260, 6);
 			// 
 			// renameToolStripMenuItem
 			// 
 			this->renameToolStripMenuItem->Name = L"renameToolStripMenuItem";
-			this->renameToolStripMenuItem->Size = System::Drawing::Size(204, 26);
+			this->renameToolStripMenuItem->Size = System::Drawing::Size(263, 34);
 			this->renameToolStripMenuItem->Text = L"Переименовать";
 			this->renameToolStripMenuItem->Click += gcnew System::EventHandler(this, &PageFile::renameToolStripMenuItem_Click);
 			// 
 			// moveToolStripMenuItem
 			// 
 			this->moveToolStripMenuItem->Name = L"moveToolStripMenuItem";
-			this->moveToolStripMenuItem->Size = System::Drawing::Size(204, 26);
+			this->moveToolStripMenuItem->Size = System::Drawing::Size(263, 34);
 			this->moveToolStripMenuItem->Text = L"Переместить";
 			this->moveToolStripMenuItem->Click += gcnew System::EventHandler(this, &PageFile::moveToolStripMenuItem_Click);
 			// 
 			// copyToolStripMenuItem
 			// 
 			this->copyToolStripMenuItem->Name = L"copyToolStripMenuItem";
-			this->copyToolStripMenuItem->Size = System::Drawing::Size(204, 26);
+			this->copyToolStripMenuItem->Size = System::Drawing::Size(263, 34);
 			this->copyToolStripMenuItem->Text = L"Копировать";
 			this->copyToolStripMenuItem->Click += gcnew System::EventHandler(this, &PageFile::copyToolStripMenuItem_Click);
 			// 
@@ -323,28 +356,30 @@ namespace RLE {
 					this->allToolStripMenuItem
 			});
 			this->pasteToolStripMenuItem->Name = L"pasteToolStripMenuItem";
-			this->pasteToolStripMenuItem->Size = System::Drawing::Size(204, 26);
+			this->pasteToolStripMenuItem->Size = System::Drawing::Size(263, 34);
 			this->pasteToolStripMenuItem->Text = L"Вставить";
 			// 
 			// onlyFilesToolStripMenuItem
 			// 
 			this->onlyFilesToolStripMenuItem->Name = L"onlyFilesToolStripMenuItem";
-			this->onlyFilesToolStripMenuItem->Size = System::Drawing::Size(225, 26);
+			this->onlyFilesToolStripMenuItem->Size = System::Drawing::Size(293, 34);
 			this->onlyFilesToolStripMenuItem->Text = L"Только файл";
 			this->onlyFilesToolStripMenuItem->Click += gcnew System::EventHandler(this, &PageFile::onlyFilesToolStripMenuItem_Click);
 			// 
 			// allToolStripMenuItem
 			// 
 			this->allToolStripMenuItem->Name = L"allToolStripMenuItem";
-			this->allToolStripMenuItem->Size = System::Drawing::Size(225, 26);
+			this->allToolStripMenuItem->Size = System::Drawing::Size(293, 34);
 			this->allToolStripMenuItem->Text = L"Все файлы и папки";
 			this->allToolStripMenuItem->Click += gcnew System::EventHandler(this, &PageFile::allToolStripMenuItem_Click);
 			// 
 			// aboutToolStripMenuItem
 			// 
+			this->aboutToolStripMenuItem->Font = (gcnew System::Drawing::Font(L"Calibri", 14));
+			this->aboutToolStripMenuItem->ForeColor = System::Drawing::SystemColors::Control;
 			this->aboutToolStripMenuItem->Name = L"aboutToolStripMenuItem";
-			this->aboutToolStripMenuItem->Size = System::Drawing::Size(121, 24);
-			this->aboutToolStripMenuItem->Text = L"�������";
+			this->aboutToolStripMenuItem->Size = System::Drawing::Size(62, 33);
+			this->aboutToolStripMenuItem->Text = L"RLE";
 			// 
 			// toolStrip1
 			// 
@@ -372,10 +407,10 @@ namespace RLE {
 			this->Controls->Add(this->richTextBox1);
 			this->Controls->Add(this->listView1);
 			this->Controls->Add(this->treeView1);
-			this->Controls->Add(this->SaveButton);
 			this->Name = L"PageFile";
 			this->Size = System::Drawing::Size(746, 477);
 			this->Load += gcnew System::EventHandler(this, &PageFile::PageFile_Load);
+			this->contextMenuStrip1->ResumeLayout(false);
 			this->menuStrip1->ResumeLayout(false);
 			this->menuStrip1->PerformLayout();
 			this->ResumeLayout(false);
@@ -388,17 +423,7 @@ namespace RLE {
 		String^ NameList;
 		String^ sourcePath;
 		String^ fileName;
-
-		//private: System::Void richTextBox1_MouseDoubleClick(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e) {
-		//	if (openFileDialog1->ShowDialog() == DialogResult::OK)
-		//	{
-		//		// получаем выбранный файл
-		//		String^ filename = openFileDialog1->FileName;
-		//		const char* ptr = (const char*)(Marshal::StringToHGlobalAnsi(filename)).ToPointer();
-		//		std::string temp = rle->ReadFile(std::string(ptr));
-		//		richTextBox1->Text = gcnew System::String(temp.c_str());
-		//	}
-		//}
+		System::Windows::Forms::ListViewItem^ SelectedItem;
 
 		private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e) {
 			String^ filename = openFileDialog1->FileName;
@@ -548,19 +573,19 @@ namespace RLE {
 					}
 					catch (...)
 					{
-						MessageBox::Show("��������� ������������ ����� �����", "������!", MessageBoxButtons::OK, MessageBoxIcon::Error);
+						MessageBox::Show("Проверьте правильность ввода имени", "Ошибка!", MessageBoxButtons::OK, MessageBoxIcon::Error);
 					}
 				}
 				else
 				{
 					e->CancelEdit = true;
-					MessageBox::Show("��� �����(�����) �� ������ ��������� ��������� ������: \/:*?<>|", "������!", MessageBoxButtons::OK, MessageBoxIcon::Error);
+					MessageBox::Show("Имя папки(файла) не должно содержать следующих знаков: \/:*?<>|", "Ошибка!", MessageBoxButtons::OK, MessageBoxIcon::Error);
 				}
 			}
 			else
 			{
 				e->CancelEdit = true;
-				MessageBox::Show("��� �����(�����) �� ����� ���� ������.", "������!", MessageBoxButtons::OK, MessageBoxIcon::Error);
+				MessageBox::Show("Имя папки(файла) не может быть пустым.", "Ошибка!", MessageBoxButtons::OK, MessageBoxIcon::Error);
 			}
 		}
 	}
@@ -637,7 +662,10 @@ namespace RLE {
 
 		for each (String ^ s in drivesArray)
 			Console::Write("{0} ", s);
+
+		general->ComboBoxTextChanged += gcnew PageGeneral::ComboBoxTextChangedEventHandler(this, &PageFile::UserControl1_ComboBoxTextChanged);
 	}
+
 	private: System::Void renameToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) {
 		if (listView1->SelectedItems->Count != 0)
 		{
@@ -645,7 +673,7 @@ namespace RLE {
 		}
 		else
 		{
-			MessageBox::Show("�� ������(-�) ���� ��� �����", "������!", MessageBoxButtons::OK, MessageBoxIcon::Error);
+			MessageBox::Show("Не выбран(-а) файл или папка", "Ошибка!", MessageBoxButtons::OK, MessageBoxIcon::Error);
 		}
 	}
 
@@ -696,24 +724,24 @@ namespace RLE {
 				}
 				else
 				{
-					MessageBox::Show("�������� ���� �� ����������", "������!", MessageBoxButtons::OK, MessageBoxIcon::Error);
+					MessageBox::Show("Исходный путь не существует", "Ошибка!", MessageBoxButtons::OK, MessageBoxIcon::Error);
 				}
 			}
 		}
 		catch (...)
 		{
-			MessageBox::Show("�� ��� ������ ����(�����) ��� ����������� ��� �����������", "������", MessageBoxButtons::OK, MessageBoxIcon::Error);
+			MessageBox::Show("Не был выбран файл(папка) для копирования или перемещения", "Ошибка", MessageBoxButtons::OK, MessageBoxIcon::Error);
 		}
 	}
 
 	private: System::Void allToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) {
-		//����������� �� �������� ��������, ������� � ���� �����������
-		//���� � listView ������ �������, ��...
+		//Копирование из текущего каталога, включая в себя подкаталоги
+		//Если в listView выбран элемент, то...
 		if (listView1->SelectedItems->Count != 0)
 		{
 			DirectoryCopy(sourcePath, Path::Combine(treeView1->SelectedNode->FullPath, listView1->SelectedItems[0]->Text), true);
 		}
-		//� ��������� ������...
+		//В противном случае...
 		else
 		{
 			DirectoryCopy(sourcePath, treeView1->SelectedNode->FullPath, true);
@@ -722,30 +750,29 @@ namespace RLE {
 
 		public: System::Void DirectoryCopy(String^ sourceDirName, String^ destDirName, bool copySubDirs)
 		{
-		  //��������� ������������ ��������� ����������
+			//Получение подкаталогов указанной директории
 		  DirectoryInfo^ dir = gcnew DirectoryInfo(sourceDirName);
 
 		  if (!dir->Exists)
 		  {
-		   throw gcnew DirectoryNotFoundException("�������� ������� �� ���������� ��� �� ����� ���� ������: " + sourceDirName);
+		   throw gcnew DirectoryNotFoundException("Исходный каталог не существует или не может быть найден: " + sourceDirName);
 		  }
 
 		  array<DirectoryInfo^>^ dirs = dir->GetDirectories();
-		  //���� ������� �� ����������, �� ������ ����� �������
+		  //Если каталог не существует, то создаём новый каталог
 		  if (!Directory::Exists(destDirName))
 		  {
-		   Directory::CreateDirectory(destDirName);
+			Directory::CreateDirectory(destDirName);
 		  }
 
-		  //��������� ������ �������� � ����������� �� �� ����� �����
+		  //Получение файлов каталога и копирование их на новое место
 		  array<FileInfo^>^ files = dir->GetFiles();
 		  for each (FileInfo ^ file in files)
 		  {
 		   String^ temppath = Path::Combine(destDirName, file->Name);
 		   file->CopyTo(temppath, false);
 		  }
-
-		  //��� ����������� ������������, �� ���������� �� � �� ���������� � ����� �����
+		  //При копировании подкаталогов, то копировать их и их содержимое в новое место
 		  if (copySubDirs)
 		  {
 		   for each (DirectoryInfo ^ subdir in dirs)
@@ -759,11 +786,11 @@ namespace RLE {
 
 	private: System::Void folderToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) 
 	{
-		//�������
+		//Счётчик
 		int i = 2;
-		//����������� ������� ���� ��� �������� ����� � ���������� ����������
+		//Запоминания полного пути для создания папки в стринговую переменную
 		String^ DirectoryFolder = treeView1->SelectedNode->FullPath;
-		String^ DirFoldName = "����� �����";
+		String^ DirFoldName = "Новая папка";
 
 		DirectoryInfo^ dir = gcnew DirectoryInfo(treeView1->SelectedNode->FullPath);
 		array<DirectoryInfo^>^ dirs = dir->GetDirectories();
@@ -781,7 +808,7 @@ namespace RLE {
 			}
 		}
 
-		//���� ������� �� ����������, �� ������ ����� �������
+		//Если каталог не существует, то создаём новый каталог
 		if (!Directory::Exists(DirectoryFolder + "\\" + DirFoldName))
 		{
 			Directory::CreateDirectory(DirectoryFolder + "\\" + DirFoldName);
@@ -793,11 +820,11 @@ namespace RLE {
 		}
 	}
 	private: System::Void textFileToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) {
-		//�������
+		//Счётчик
 		int i = 2;
-		//����������� ������� ���� ��� �������� ����� � ���������� ����������
+		//Запоминания полного пути для создания папки в стринговую переменную
 		String^ DirectoryFile = treeView1->SelectedNode->FullPath;
-		String^ DirFileName = "����� ��������� ��������";
+		String^ DirFileName = "Новый текстовый документ";
 
 		DirectoryInfo^ file = gcnew DirectoryInfo(treeView1->SelectedNode->FullPath);
 		array<FileInfo^>^ files = file->GetFiles();
@@ -815,7 +842,7 @@ namespace RLE {
 			}
 		}
 
-		//���� ������� �� ����������, �� ������ ����� �������
+		//Если каталог не существует, то создаём новый каталог
 		if (!File::Exists(DirectoryFile + "\\" + DirFileName + ".txt"))
 		{
 			File::Create(DirectoryFile + "\\" + DirFileName + ".txt");
@@ -829,6 +856,7 @@ namespace RLE {
 	private: System::Void moveToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) {
 
 	}
+
 	private: System::Void deleteToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) {
 		if (listView1->SelectedItems->Count != 0)
 		{
@@ -845,7 +873,7 @@ namespace RLE {
 		{
 			if (Directory::Exists(Path::Combine(treeView1->SelectedNode->FullPath, NameList)))
 			{
-				if (MessageBox::Show("�� ������������� ������ ������� �����?", "��������", MessageBoxButtons::YesNo, MessageBoxIcon::Question) == System::Windows::Forms::DialogResult::Yes)
+				if (MessageBox::Show("Вы действительно хотите удалить папку?", "Удаление", MessageBoxButtons::YesNo, MessageBoxIcon::Question) == System::Windows::Forms::DialogResult::Yes)
 				{
 					try
 					{
@@ -856,13 +884,13 @@ namespace RLE {
 					}
 					catch (...)
 					{
-						MessageBox::Show("���������� ������� ������ �����", "������", MessageBoxButtons::OK, MessageBoxIcon::Error);
+						MessageBox::Show("Невозможно удалить данную папку", "Ошибка", MessageBoxButtons::OK, MessageBoxIcon::Error);
 					}
 				}
 			}
 			else if (File::Exists(Path::Combine(treeView1->SelectedNode->FullPath, NameList)))
 			{
-				if (MessageBox::Show("�� ������������� ������ ������� ����?", "��������", MessageBoxButtons::YesNo, MessageBoxIcon::Question) == System::Windows::Forms::DialogResult::Yes)
+				if (MessageBox::Show("Вы действительно хотите удалить файл?", "Удаление", MessageBoxButtons::YesNo, MessageBoxIcon::Question) == System::Windows::Forms::DialogResult::Yes)
 				{
 					try
 					{
@@ -872,7 +900,7 @@ namespace RLE {
 					}
 					catch (...)
 					{
-						MessageBox::Show("���������� ������� ������ ����", "������", MessageBoxButtons::OK, MessageBoxIcon::Error);
+						MessageBox::Show("Невозможно удалить данный файл", "Ошибка", MessageBoxButtons::OK, MessageBoxIcon::Error);
 					}
 				}
 			}
@@ -881,7 +909,7 @@ namespace RLE {
 		{
 			if (Directory::Exists(treeView1->SelectedNode->FullPath))
 			{
-				if (MessageBox::Show("�� ������������� ������ ������� �����?", "��������", MessageBoxButtons::YesNo, MessageBoxIcon::Question) == System::Windows::Forms::DialogResult::Yes)
+				if (MessageBox::Show("Вы действительно хотите удалить папку?", "Удаление", MessageBoxButtons::YesNo, MessageBoxIcon::Question) == System::Windows::Forms::DialogResult::Yes)
 				{
 					try
 					{
@@ -890,11 +918,121 @@ namespace RLE {
 					}
 					catch (...)
 					{
-						MessageBox::Show("���������� ������� ������ �����", "������", MessageBoxButtons::OK, MessageBoxIcon::Error);
+						MessageBox::Show("Невозможно удалить данную папку", "Ошибка", MessageBoxButtons::OK, MessageBoxIcon::Error);
 					}
 				}
 			}
 		}
 	}
+	private: System::Void CompressToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) {
+		if (aboutToolStripMenuItem->Text == "RLE")
+		{
+			NameList = this->SelectedItem->Text;
+			NameList = Path::Combine(treeView1->SelectedNode->FullPath, NameList);
+
+			const char* ptr = (const char*)(Marshal::StringToHGlobalAnsi(NameList)).ToPointer();
+
+			if (saveFileDialog1->ShowDialog() == DialogResult::OK)
+			{
+				String^ filenamesave = saveFileDialog1->FileName;
+				const char* _ptr = (const char*)(Marshal::StringToHGlobalAnsi(filenamesave)).ToPointer();
+				rle->RLE_Compress(std::string(ptr), std::string(_ptr));
+				std::string temp = rle->ReadFile(std::string(_ptr));
+				//richTextBox1->Text = gcnew System::String(temp.c_str());
+
+				FileInfo^ info = gcnew FileInfo(saveFileDialog1->FileName);
+				analysis->comp->rle = info->Length;
+				analysis->Update();
+			}
+		}
+		else if(aboutToolStripMenuItem->Text == "LZW")
+		{
+			NameList = this->SelectedItem->Text;
+			NameList = Path::Combine(treeView1->SelectedNode->FullPath, NameList);
+
+			const char* ptr = (const char*)(Marshal::StringToHGlobalAnsi(NameList)).ToPointer();
+
+			if (saveFileDialog1->ShowDialog() == DialogResult::OK)
+			{
+				String^ filenamesave = saveFileDialog1->FileName;
+				const char* _ptr = (const char*)(Marshal::StringToHGlobalAnsi(filenamesave)).ToPointer();
+				lzw->LZW_Compress(std::string(ptr), std::string(_ptr));
+				std::string temp = rle->ReadFile(std::string(_ptr));
+
+				FileInfo^ info = gcnew FileInfo(saveFileDialog1->FileName);
+				analysis->comp->lzw = info->Length;
+			}
+		}
+		else if (aboutToolStripMenuItem->Text == "Huffman compression")
+		{
+			NameList = this->SelectedItem->Text;
+			NameList = Path::Combine(treeView1->SelectedNode->FullPath, NameList);
+
+			const char* ptr = (const char*)(Marshal::StringToHGlobalAnsi(NameList)).ToPointer();
+
+			if (saveFileDialog1->ShowDialog() == DialogResult::OK)
+			{
+				String^ filenamesave = saveFileDialog1->FileName;
+				const char* _ptr = (const char*)(Marshal::StringToHGlobalAnsi(filenamesave)).ToPointer();
+				lzw->LZW_Compress(std::string(ptr), std::string(_ptr));
+				std::string temp = rle->ReadFile(std::string(_ptr));
+
+				FileInfo^ info = gcnew FileInfo(saveFileDialog1->FileName);
+				analysis->comp->huffman = info->Length;
+			}
+		}
+	}
+	private: System::Void listView1_ItemSelectionChanged(System::Object^ sender, System::Windows::Forms::ListViewItemSelectionChangedEventArgs^ e) {
+		this->SelectedItem = e->Item;
+	}
+
+	private: System::Void расжатьToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) {
+		if (aboutToolStripMenuItem->Text == "RLE")
+		{
+			NameList = this->SelectedItem->Text;
+			NameList = Path::Combine(treeView1->SelectedNode->FullPath, NameList);
+
+			const char* ptr = (const char*)(Marshal::StringToHGlobalAnsi(NameList)).ToPointer();
+
+			if (saveFileDialog1->ShowDialog() == DialogResult::OK)
+			{
+				String^ filenamesave = saveFileDialog1->FileName;
+				const char* _ptr = (const char*)(Marshal::StringToHGlobalAnsi(filenamesave)).ToPointer();
+				rle->RLE_Decompress(std::string(ptr), std::string(_ptr));
+				std::string temp = rle->ReadFile(std::string(_ptr));
+			}
+		}
+		else if (aboutToolStripMenuItem->Text == "LZW")
+		{
+			NameList = this->SelectedItem->Text;
+			NameList = Path::Combine(treeView1->SelectedNode->FullPath, NameList);
+
+			const char* ptr = (const char*)(Marshal::StringToHGlobalAnsi(NameList)).ToPointer();
+
+			if (saveFileDialog1->ShowDialog() == DialogResult::OK)
+			{
+				String^ filenamesave = saveFileDialog1->FileName;
+				const char* _ptr = (const char*)(Marshal::StringToHGlobalAnsi(filenamesave)).ToPointer();
+				lzw->LZW_Decompress(std::string(ptr), std::string(_ptr));
+				std::string temp = rle->ReadFile(std::string(_ptr));
+			}
+		}
+		else if (aboutToolStripMenuItem->Text == "Huffman compression")
+		{
+			NameList = this->SelectedItem->Text;
+			NameList = Path::Combine(treeView1->SelectedNode->FullPath, NameList);
+
+			const char* ptr = (const char*)(Marshal::StringToHGlobalAnsi(NameList)).ToPointer();
+
+			if (saveFileDialog1->ShowDialog() == DialogResult::OK)
+			{
+				String^ filenamesave = saveFileDialog1->FileName;
+				const char* _ptr = (const char*)(Marshal::StringToHGlobalAnsi(filenamesave)).ToPointer();
+				lzw->LZW_Decompress(std::string(ptr), std::string(_ptr));
+				std::string temp = rle->ReadFile(std::string(_ptr));
+			}
+		}
+	}
+
 };
 }

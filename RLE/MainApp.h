@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "PageGeneral.h"
 #include "PageSideBar.h"
-#include "PageImage.h"
+#include "PageAnalysis.h"
 #include "PageFile.h"
 #include "NavigationService.h"
 
@@ -21,7 +21,7 @@ namespace RLE {
 	{
 	public:
 		PageFile^ file;
-		PageImage^ image;
+		PageAnalysis^ Analysis;
 		PageGeneral^ general;
 
 		MainApp(void)
@@ -31,22 +31,19 @@ namespace RLE {
 			//TODO: добавьте код конструктора
 			//
 
-			image = gcnew PageImage();
+			Analysis = gcnew PageAnalysis();
 			general = gcnew PageGeneral();
-			file = gcnew PageFile(general);
+			file = gcnew PageFile(general, Analysis);
 
 			this->radioButton1->FlatAppearance->MouseOverBackColor = System::Drawing::Color().FromArgb(33, 150, 243);
 			this->radioButton4->FlatAppearance->MouseOverBackColor = System::Drawing::Color().FromArgb(33, 150, 243);
-			this->radioButton5->FlatAppearance->MouseOverBackColor = System::Drawing::Color().FromArgb(33, 150, 243);
 			this->radioButton6->FlatAppearance->MouseOverBackColor = System::Drawing::Color().FromArgb(33, 150, 243);
 
 			this->radioButton1->FlatAppearance->CheckedBackColor = System::Drawing::Color().FromArgb(33, 150, 243);
 			this->radioButton4->FlatAppearance->CheckedBackColor = System::Drawing::Color().FromArgb(33, 150, 243);
-			this->radioButton5->FlatAppearance->CheckedBackColor = System::Drawing::Color().FromArgb(33, 150, 243);
 			this->radioButton6->FlatAppearance->CheckedBackColor = System::Drawing::Color().FromArgb(33, 150, 243);
 
 			this->radioButton1->Image = Image::FromFile("Image/file_30px.png");
-			this->radioButton5->Image = Image::FromFile("Image/image_gallery_30px.png");
 			this->radioButton4->Image = Image::FromFile("Image/settings_30px.png");
 			this->radioButton6->Image = Image::FromFile("Image/graph_30px.png");
 			this->ExitButton->Image = Image::FromFile("Image/close_30px.png");
@@ -138,7 +135,6 @@ namespace RLE {
 			this->SideBarPanel->Controls->Add(this->radioButton4);
 			this->SideBarPanel->Controls->Add(this->radioButton6);
 			this->SideBarPanel->Controls->Add(this->radioButton1);
-			this->SideBarPanel->Controls->Add(this->radioButton5);
 			this->SideBarPanel->Controls->Add(this->panel2);
 			resources->ApplyResources(this->SideBarPanel, L"SideBarPanel");
 			this->SideBarPanel->Name = L"SideBarPanel";
@@ -172,16 +168,6 @@ namespace RLE {
 			this->radioButton1->Name = L"radioButton1";
 			this->radioButton1->UseVisualStyleBackColor = false;
 			this->radioButton1->Enter += gcnew System::EventHandler(this, &MainApp::radioButton1_Enter);
-			// 
-			// radioButton5
-			// 
-			resources->ApplyResources(this->radioButton5, L"radioButton5");
-			this->radioButton5->BackColor = System::Drawing::Color::Transparent;
-			this->radioButton5->FlatAppearance->BorderSize = 0;
-			this->radioButton5->ForeColor = System::Drawing::SystemColors::Control;
-			this->radioButton5->Name = L"radioButton5";
-			this->radioButton5->UseVisualStyleBackColor = false;
-			this->radioButton5->Enter += gcnew System::EventHandler(this, &MainApp::radioButton5_Enter);
 			// 
 			// panel2
 			// 
@@ -242,14 +228,10 @@ namespace RLE {
 		}
 #pragma endregion
 	private: System::Void MainApp_Load(System::Object^ sender, System::EventArgs^ e) {
-		PagePanelControl->Controls->Add(general);
-		label1->Text = "Settings";
+		NavigationService::getInstance()->Navigate("Settings", label1, general, PagePanelControl);
 	}
 	private: System::Void radioButton6_Click(System::Object^ sender, System::EventArgs^ e) {
-
-	}
-	private: System::Void radioButton5_Enter(System::Object^ sender, System::EventArgs^ e) {
-		NavigationService::getInstance()->Navigate("Image", label1, image, PagePanelControl);
+		NavigationService::getInstance()->Navigate("Analysis", label1, Analysis, PagePanelControl);
 	}
 	private: System::Void radioButton4_Enter(System::Object^ sender, System::EventArgs^ e) {
 		NavigationService::getInstance()->Navigate("Settings", label1, general, PagePanelControl);

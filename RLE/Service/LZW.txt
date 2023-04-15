@@ -1,0 +1,67 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <map>
+using namespace std;
+
+map<string, int> dictionary;
+
+void createDictionary() {
+    for (int i = 0; i < 256; i++) {
+        string ch = "";
+        ch += char(i);
+        dictionary[ch] = i;
+    }
+}
+
+void compress(string fileName) {
+    ifstream file(fileName);
+    string message((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
+    file.close();
+    string compressedFileName = fileName.substr(0, fileName.find(".")) + ".lzw";
+    ofstream compressedFile(compressedFileName);
+    string w = "";
+    for (char& c : message) {
+        string wc = w + c;
+        if (dictionary.count(wc)) {
+            w = wc;
+        } else {
+            compressedFile << dictionary[w] << " ";
+            dictionary[wc] = dictionary.size();
+            w = string(1, c);
+        }
+    }
+    if (!w.empty()) {
+        compressedFile << dictionary[w] << " ";
+    }
+    compressedFile.close();
+}
+
+void decompress(string fileName) {
+    createDictionary();
+    ifstream compressedFile(fileName);
+    string compressed((istreambuf_iterator<char>(compressedFile)), istreambuf_iterator<char>());
+    compressedFile.close();
+    string decompressedFileName = fileName.substr(0, fileName.find(".")) + "_decompressed.txt";
+    ofstream decompressedFile(decompressedFileName);
+    string w = "";
+    int k;
+    for (char& c : compressed) {
+        int i = c - '0';
+        if (dictionary.count(w + to_string(i))) {
+            w += to_string(i);
+        } else {
+            decompressedFile << (char)dictionary[w];
+            dictionary[w + to_string(i)] = dictionary.size();
+            w = to_string(i);
+        }
+    }
+}
+
+int main() {
+    string fileName = "example.txt";
+    cout << "Original File: " << fileName << endl;
+    compress(fileName);
+    cout << "Compressed File: " << fileName.substr(0, fileName.find(".")) + ".lzw" << endl;
+    decompress(fileName.substr(0, fileName.find(".")) + ".lzw");
+}

@@ -16,6 +16,9 @@ namespace RLE {
 	public ref class PageGeneral : public System::Windows::Forms::UserControl
 	{
 	public:
+		delegate void ComboBoxTextChangedEventHandler(System::Object^ sender, System::String^ text);
+		event ComboBoxTextChangedEventHandler^ ComboBoxTextChanged;
+
 		PageGeneral(void)
 		{
 			InitializeComponent();
@@ -23,7 +26,7 @@ namespace RLE {
 			//TODO: добавьте код конструктора
 			//
 		}
-
+	
 	protected:
 		/// <summary>
 		/// Освободить все используемые ресурсы.
@@ -82,12 +85,13 @@ namespace RLE {
 			// comboBox2
 			// 
 			this->comboBox2->FormattingEnabled = true;
-			this->comboBox2->Items->AddRange(gcnew cli::array< System::Object^  >(2) { L"LZW", L"Huffman compression" });
+			this->comboBox2->Items->AddRange(gcnew cli::array< System::Object^  >(3) { L"RLE", L"LZW", L"Huffman compression" });
 			this->comboBox2->Location = System::Drawing::Point(87, 55);
 			this->comboBox2->Name = L"comboBox2";
 			this->comboBox2->Size = System::Drawing::Size(158, 24);
 			this->comboBox2->TabIndex = 1;
-			this->comboBox2->Text = L"LZW";
+			this->comboBox2->Text = L"RLE";
+			this->comboBox2->TextChanged += gcnew System::EventHandler(this, &PageGeneral::comboBox2_TextChanged);
 			// 
 			// ColorPicker
 			// 
@@ -222,21 +226,6 @@ namespace RLE {
 				radio->FlatAppearance->CheckedBackColor = System::Drawing::Color().FromArgb(229, 27, 72);
 			}
 		}
-	
-		//Panel^ PagePanelControl = (Panel^)this->ParentForm->Controls->Find("PagePanelControl", true)[0];
-		//for (size_t i = 0; i < PagePanelControl->Controls->Count; i++)
-		//{
-		//	UserControl^ page = dynamic_cast<UserControl^>(PagePanelControl->Controls[i]);
-		//	if (page != nullptr)
-		//	{
-		//		page->BackColor = Color::FromArgb(95, 57, 100);
-		//		//Button^ buttonSave = dynamic_cast<Button^>(page->Controls->Find("SaveButton", true)[0]);
-		//		//buttonSave->BackColor = Color::FromArgb(95, 57, 100);
-		//	}
-		//}
-		//Button^ buttonSave = dynamic_cast<Button^>(PagePanelControl->Controls->Find("SaveButton", true)[0]);
-		//Button^ button = (Button^)this->Parent->Controls->Find("SaveButton", true)[0];
-		//button->BackColor = Color::FromArgb(95, 40, 100);
 	}
 
 	private: System::Void ColorButton_2_Click(System::Object^ sender, System::EventArgs^ e) {
@@ -330,6 +319,9 @@ namespace RLE {
 				radio->FlatAppearance->CheckedBackColor = System::Drawing::Color().FromArgb(230, 88, 84);
 			}
 		}
+	}
+	private: System::Void comboBox2_TextChanged(System::Object^ sender, System::EventArgs^ e) {
+		ComboBoxTextChanged(this, comboBox2->Text);
 	}
 };
 }
