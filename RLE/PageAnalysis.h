@@ -1,4 +1,10 @@
 ﻿#pragma once
+#include <iostream>
+#include <vector>
+#include <string>
+#include <fstream>
+#include <regex>
+#include "PageFile.h"
 
 using namespace System;
 using namespace System::ComponentModel;
@@ -7,26 +13,30 @@ using namespace System::Windows::Forms;
 using namespace System::Data;
 using namespace System::Drawing;
 
-
 namespace RLE {
-
 	/// <summary>
 	/// Сводка для PageAnalysis
 	/// </summary>
 	public ref class PageAnalysis : public System::Windows::Forms::UserControl
 	{
 	public:
-		delegate void ComboBoxTextChangedEventHandler(System::Object^ sender, System::String^ text);
-		event ComboBoxTextChangedEventHandler^ ComboBoxTextChanged;
+		PageFile^ file;
 
-		ref struct Compression
+		void AddNumber(long rle, long lzw, long huffman)
 		{
-			long rle, lzw, huffman;
-		};
-		Compression^ comp;
+			this->chart1->Series[0]->Points->Add(rle);
+			this->chart1->Series[1]->Points->Add(lzw);
+			this->chart1->Series[2]->Points->Add(huffman);
+		}
+
+		PageAnalysis(PageFile^ file)
+		{
+			this->file = file;
+			InitializeComponent();
+		}
+
 		PageAnalysis(void)
 		{
-			comp = gcnew Compression();
 			InitializeComponent();
 			//
 			//TODO: добавьте код конструктора
@@ -119,7 +129,7 @@ namespace RLE {
 		}
 #pragma endregion
 	private: System::Void PageAnalysis_Load(System::Object^ sender, System::EventArgs^ e) {
-		this->chart1->Series[0]->Points->Add(comp->rle);
+		file->AddNumberEvent += gcnew PageFile::AddNumberEventHandler(this, &PageAnalysis::AddNumber);
 	}
 };
 }

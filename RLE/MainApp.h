@@ -20,8 +20,8 @@ namespace RLE {
 	public ref class MainApp : public System::Windows::Forms::Form
 	{
 	public:
-		PageFile^ file;
 		PageAnalysis^ Analysis;
+		PageFile^ file;
 		PageGeneral^ general;
 
 		MainApp(void)
@@ -31,9 +31,9 @@ namespace RLE {
 			//TODO: добавьте код конструктора
 			//
 
-			Analysis = gcnew PageAnalysis();
 			general = gcnew PageGeneral();
-			file = gcnew PageFile(general, Analysis);
+			file = gcnew PageFile(general);
+			Analysis = gcnew PageAnalysis(file);
 
 			this->radioButton1->FlatAppearance->MouseOverBackColor = System::Drawing::Color().FromArgb(33, 150, 243);
 			this->radioButton4->FlatAppearance->MouseOverBackColor = System::Drawing::Color().FromArgb(33, 150, 243);

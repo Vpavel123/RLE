@@ -134,6 +134,7 @@
     <ClCompile Include="PageGeneral.cpp" />
     <ClCompile Include="PageSideBar.cpp" />
     <ClCompile Include="RLEencryption.cpp" />
+    <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Huffman.h" />
@@ -155,6 +156,7 @@
       <FileType>CppControl</FileType>
     </ClInclude>
     <ClInclude Include="RLEencryption.h" />
+    <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="MainApp.resx">

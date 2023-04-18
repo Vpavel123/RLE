@@ -1,9 +1,10 @@
 ﻿#pragma once
 #include <string>
 #include "PageGeneral.h"
-#include "PageAnalysis.h"
 #include "LZW.h"
+#include "Huffman.h"
 #include "RLEencryption.h"
+#include <iostream>
 
 using namespace System;
 using namespace System::ComponentModel;
@@ -60,21 +61,30 @@ namespace RLE {
 	public:
 		RLEencryption* rle;
 		LZW* lzw;
+		
 		PageGeneral^ general;
-		PageAnalysis^ analysis;
+
+		delegate void AddNumberEventHandler(long rle, long lzw, long huffman);
+		event AddNumberEventHandler^ AddNumberEvent;
+
+		ref struct Compression
+		{
+			long rle, lzw, huffman;
+		};
+		Compression^ comp;
 
 		void UserControl1_ComboBoxTextChanged(System::Object^ sender, System::String^ text)
 		{
 			aboutToolStripMenuItem->Text = text;
 		}
 
-		PageFile(PageGeneral^ general, PageAnalysis^ analysis)
+		PageFile(PageGeneral^ general)
 		{
+			comp = gcnew Compression();
 			InitializeComponent();
 			//
 			//TODO: добавьте код конструктора
 			//
-			this->analysis = analysis;
 			this->general = general;
 			lzw = new LZW();
 			rle = new RLEencryption();
@@ -941,8 +951,8 @@ namespace RLE {
 				//richTextBox1->Text = gcnew System::String(temp.c_str());
 
 				FileInfo^ info = gcnew FileInfo(saveFileDialog1->FileName);
-				analysis->comp->rle = info->Length;
-				analysis->Update();
+				comp->rle = info->Length;
+				AddNumberEvent(comp->rle, comp->lzw, comp->huffman);
 			}
 		}
 		else if(aboutToolStripMenuItem->Text == "LZW")
@@ -958,9 +968,9 @@ namespace RLE {
 				const char* _ptr = (const char*)(Marshal::StringToHGlobalAnsi(filenamesave)).ToPointer();
 				lzw->LZW_Compress(std::string(ptr), std::string(_ptr));
 				std::string temp = rle->ReadFile(std::string(_ptr));
-
 				FileInfo^ info = gcnew FileInfo(saveFileDialog1->FileName);
-				analysis->comp->lzw = info->Length;
+				comp->lzw = info->Length;
+				AddNumberEvent(comp->rle, comp->lzw, comp->huffman);
 			}
 		}
 		else if (aboutToolStripMenuItem->Text == "Huffman compression")
@@ -974,11 +984,11 @@ namespace RLE {
 			{
 				String^ filenamesave = saveFileDialog1->FileName;
 				const char* _ptr = (const char*)(Marshal::StringToHGlobalAnsi(filenamesave)).ToPointer();
-				lzw->LZW_Compress(std::string(ptr), std::string(_ptr));
+				//compressFile(ptr, std::string(_ptr));
 				std::string temp = rle->ReadFile(std::string(_ptr));
-
 				FileInfo^ info = gcnew FileInfo(saveFileDialog1->FileName);
-				analysis->comp->huffman = info->Length;
+				comp->huffman = info->Length;
+				AddNumberEvent(comp->rle, comp->lzw, comp->huffman);
 			}
 		}
 	}

@@ -8,34 +8,48 @@ LZW::LZW()
 
 void LZW::LZW_Compress(std::string input_file_name, std::string output_file_name)
 {
-    std::ifstream input(input_file_name);
-    std::ofstream output(output_file_name);
-
-    if (!input || !output) {
-        throw std::runtime_error("Cannot open files");
+    std::ifstream input(input_file_name, std::ios::binary);
+    std::ofstream output(output_file_name, std::ios::binary);
+    if (!input.is_open()) {
+        std::cerr << "Ошибка открытия файла для чтения" << std::endl;
+        return;
     }
 
-    std::unordered_map<std::vector<unsigned char>, int> dict;
-    for (int i = 0; i < 256; ++i) {
-        dict[std::vector<unsigned char>(1, i)] = i;
+    // Открытие файла для записи
+    if (!output.is_open()) {
+        std::cerr << "Ошибка открытия файла для записи" << std::endl;
+        return;
     }
-    int dict_size = 256;
-    std::vector<unsigned char> s;
-    unsigned char ch;
-    while (input.read(reinterpret_cast<char*>(&ch), sizeof(ch))) {
-        std::vector<unsigned char> s_new = s;
-        s_new.push_back(ch);
-        if (dict.count(s_new)) {
-            s = s_new;
+
+    // Инициализация словаря
+    std::unordered_map<std::string, int> dictionary;
+    for (int i = 0; i < 256; i++) {
+        std::string s(1, (char)i);
+        dictionary[s] = i;
+    }
+
+    // Чтение входного файла и сжатие данных
+    std::string currentString;
+    char c;
+    std::vector<int> compressedData;
+    while (input.get(c)) {
+        std::string newString = currentString + c;
+        if (dictionary.count(newString)) {
+            currentString = newString;
         }
         else {
-            output.write(reinterpret_cast<const char*>(&dict[s]), sizeof(dict[s]));
-            dict[s_new] = dict_size++;
-            s = std::vector<unsigned char>(1, ch);
+            compressedData.push_back(dictionary[currentString]);
+            dictionary[newString] = dictionary.size();
+            currentString = std::string(1, c);
         }
     }
-    if (!s.empty()) {
-        output.write(reinterpret_cast<const char*>(&dict[s]), sizeof(dict[s]));
+    if (!currentString.empty()) {
+        compressedData.push_back(dictionary[currentString]);
+    }
+
+    // Запись сжатых данных в выходной файл
+    for (int i : compressedData) {
+        output.write((char*)&i, sizeof(int));
     }
 
     input.close();
@@ -44,57 +58,34 @@ void LZW::LZW_Compress(std::string input_file_name, std::string output_file_name
 
 void LZW::LZW_Decompress(std::string input_file_name, std::string output_file_name)
 {
-    std::ifstream input(input_file_name);
-    std::ofstream output(output_file_name);
-    if (!input || !output) {
-        throw std::runtime_error("Cannot open files");
+    std::ifstream input(input_file_name, std::ios::binary);
+    std::ofstream output(output_file_name, std::ios::binary);
+
+    std::unordered_map<int, std::vector<char>> dictionary;
+    for (int i = 0; i < 256; i++) {
+        dictionary[i] = { char(i) };
     }
 
-    std::unordered_map<int, std::vector<unsigned char>> dict;
-    for (int i = 0; i < 256; ++i) {
-        dict[i] = std::vector<unsigned char>(1, i);
-    }
-    int dict_size = 256;
+    int code = 256;
+    int currentCode;
+    std::vector<char> currentString;
+    input.read(reinterpret_cast<char*>(&currentCode), sizeof(currentCode));
+    currentString = dictionary[currentCode];
+    output.write(currentString.data(), currentString.size());
 
-    int code;
-    std::vector<unsigned char> s;
-    unsigned char ch;
-    while (input.read(reinterpret_cast<char*>(&code), sizeof(code))) {
-        if (dict.count(code)) {
-            s = dict[code];
-        }
-        else if (code == dict_size) {
-            s.push_back(s[0]);
+    while (input.read(reinterpret_cast<char*>(&currentCode), sizeof(currentCode))) {
+        if (dictionary.find(currentCode) == dictionary.end()) {
+            dictionary[currentCode] = currentString;
+            currentString.push_back(currentString[0]);
         }
         else {
-            throw std::runtime_error("Bad compressed file");
+            currentString = dictionary[currentCode];
         }
-        output.write(reinterpret_cast<const char*>(&s[0]), s.size());
-        if (!dict.count(dict_size - 1)) {
-            s.push_back(s[0]);
-            dict[dict_size++ - 1] = s;
-            s.pop_back();
-        }
+        output.write(currentString.data(), currentString.size());
+        dictionary[code] = dictionary[currentCode];
+        code++;
     }
+
     input.close();
     output.close();
-
-
-    //createDictionary();
-    //std::string compressed((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
-    //input.close();
-    //std::string decompressedFileName = input_file_name.substr(0, input_file_name.find(".")) + "_decompressed.txt";
-    //std::string w = "";
-    //int k;
-    //for (char& c : compressed) {
-    //    int i = c - '0';
-    //    if (dictionary.count(w + std::to_string(i))) {
-    //        w += std::to_string(i);
-    //    }
-    //    else {
-    //        output << (char)dictionary[w];
-    //        dictionary[w + std::to_string(i)] = dictionary.size();
-    //        w = std::to_string(i);
-    //    }
-    //}
 }

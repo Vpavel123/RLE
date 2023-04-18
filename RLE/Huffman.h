@@ -3,138 +3,98 @@
 #include <fstream>
 #include <queue>
 #include <unordered_map>
-#include <vector>
+#include <bitset>
 
 // Структура узла дерева Хаффмана
 struct Node {
-    char data;  // символ
-    int freq;   // частота символа
-    Node* left, * right; // левый и правый потомки
-
-    Node(char data, int freq) {
-        this->data = data;
+    char ch;
+    int freq;
+    Node* left;
+    Node* right;
+    Node(char ch, int freq, Node* left = nullptr, Node* right = nullptr) {
+        this->ch = ch;
         this->freq = freq;
-        left = right = nullptr;
+        this->left = left;
+        this->right = right;
     }
 };
 
-// Сравнение узлов по их частоте
-struct CompareNodes {
-    bool operator()(Node* left, Node* right) {
-        return left->freq > right->freq;
+// Сравнение узлов дерева Хаффмана по частоте
+struct Compare {
+    bool operator()(Node* a, Node* b) {
+        return a->freq > b->freq;
     }
 };
 
-// Построение дерева Хаффмана на основе частот символов
-Node* buildHuffmanTree(const std::unordered_map<char, int>& freqMap) {
-    std::priority_queue<Node*, std::vector<Node*>, CompareNodes> pq;
 
-    // Создание начальных узлов-листьев для каждого символа и добавление их в очередь
-    for (const auto& kv : freqMap) {
-        pq.push(new Node(kv.first, kv.second));
+// Построение дерева Хаффмана
+Node* buildHuffmanTree(std::unordered_map<char, int>& freq) {
+    std::priority_queue<Node*, std::vector<Node*>, Compare> pq;
+    for (auto& p : freq) {
+        pq.push(new Node(p.first, p.second));
     }
-
-    // Слияние узлов до тех пор, пока не останется один корневой узел дерева
     while (pq.size() > 1) {
         Node* left = pq.top(); pq.pop();
         Node* right = pq.top(); pq.pop();
-        Node* parent = new Node('$', left->freq + right->freq); // Создание нового узла-родителя
-        parent->left = left;
-        parent->right = right;
+        Node* parent = new Node('\0', left->freq + right->freq, left, right);
         pq.push(parent);
     }
-
-    return pq.top(); // Возврат корневого узла дерева Хаффмана
+    return pq.top();
 }
 
-// Рекурсивное построение таблицы кодов Хаффмана
-void buildHuffmanCodes(Node* root, std::string code, std::unordered_map<char, std::string>& codesMap) {
+// Создание таблицы кодирования
+void createEncodingTable(Node* root, std::string code, std::unordered_map<char, std::string>& table) {
     if (!root) return;
-
-    if (root->data != '$') {
-        codesMap[root->data] = code;
+    if (!root->left && !root->right) {
+        table[root->ch] = code;
     }
-
-    buildHuffmanCodes(root->left, code + "0", codesMap);
-    buildHuffmanCodes(root->right, code + "1", codesMap);
+    createEncodingTable(root->left, code + "0", table);
+    createEncodingTable(root->right, code + "1", table);
 }
 
 // Сжатие файла методом Хаффмана
-void compressFile(const std::string& inputFileName, const std::string& outputFileName) {
-    std::ifstream inFile(inputFileName, std::ios::in | std::ios::binary);
-    if (!inFile.is_open()) {
-        std::cout << "Error: Could not open file " << inputFileName << std::endl;
-        return;
-    }
-
-    // Подсчет частот символов в файле
-    std::unordered_map<char, int> freqMap;
-    int fileSizeInBytes = 0;
+void compressFile(std::string inputFile, std::string outputFile) {
+    // Считываем исходный файл и подсчитываем частоту встречаемости каждого символа в нем
+    std::unordered_map<char, int> freq;
+    std::ifstream fin(inputFile);
     char ch;
-    while (inFile.get(ch)) {
-        freqMap[ch]++;
-        fileSizeInBytes++;
+    while (fin.get(ch)) {
+        freq[ch]++;
     }
-    inFile.close();
+    fin.close();
 
-    // Построение дерева Хаффмана на основе частот символов
-    Node* root = buildHuffmanTree(freqMap);
+    // Построение дерева Хаффмана
+    Node* root = buildHuffmanTree(freq);
 
-    // Построение таблицы кодов Хаффмана для каждого символа
-    std::unordered_map<char, std::string> codesMap;
-    buildHuffmanCodes(root, "", codesMap);
+    // Создание таблицы кодирования
+    std::unordered_map<char, std::string> encodingTable;
+    createEncodingTable(root, "", encodingTable);
 
-    // Запись сжатых данных в выходной файл
-    std::ofstream outFile(outputFileName, std::ios::out | std::ios::binary);
-    if (!outFile.is_open()) {
-        std::cout << "Error: Could not open file " << outputFileName << std::endl;
-        return;
+    // Записываем таблицу кодирования в сжатый файл
+    std::ofstream fout(outputFile);
+    for (auto& p : encodingTable) {
+        fout << p.first << " " << p.second << std::endl;
     }
+    fout << std::endl;
 
-    // Запись числа символов и их частот в выходной файл
-    int numSymbols = freqMap.size();
-    outFile.write(reinterpret_cast<char*>(&numSymbols), sizeof(numSymbols));
-    for (const auto& kv : freqMap);
-}
-
-// Расжатие файла, используя код Хаффмана для каждого символа
-void decompressFile(const std::string & compressedFileName, const std::string & decompressedFileName) {
-    std::ifstream compressedFile(compressedFileName, std::ios::in | std::ios::binary);
-    if (!compressedFile.is_open()) {
-        std::cout << "Error: Could not open file " << compressedFileName << std::endl;
-        return;
+    // Считываем исходный файл еще раз и заменяем каждый символ на его код из таблицы кодирования
+    fin.open(inputFile);
+    std::string encodedStr = "";
+    while (fin.get(ch)) {
+        encodedStr += encodingTable[ch];
     }
+    fin.close();
 
-    // Чтение таблицы частот из сжатого файла
-    int numSymbols;
-    compressedFile.read(reinterpret_cast<char*>(&numSymbols), sizeof(numSymbols));
-    std::unordered_map<char, int> freqMap;
-    for (int i = 0; i < numSymbols; i++) {
-        char ch;
-        int freq;
-        compressedFile.read(reinterpret_cast<char*>(&ch), sizeof(ch));
-        compressedFile.read(reinterpret_cast<char*>(&freq), sizeof(freq));
-        freqMap[ch] = freq;
+    // Записываем закодированный файл в сжатый файл
+    int padding = 8 - encodedStr.length() % 8;
+    for (int i = 0; i < padding; i++) {
+        encodedStr += "0";
     }
-
-    // Построение дерева Хаффмана на основе таблицы частот
-    Node* root = buildHuffmanTree(freqMap);
-
-    // Чтение закодированных данных из сжатого файла
-    std::ofstream decompressedFile(decompressedFileName, std::ios::out | std::ios::binary);
-    if (!decompressedFile.is_open()) {
-        std::cout << "Error: Could not open file " << decompressedFileName << std::endl;
-        return;
+    fout << padding << std::endl;
+    for (int i = 0; i < encodedStr.length(); i += 8) {
+        std::string byteStr = encodedStr.substr(i, 8);
+        char byte = std::bitset<8>(byteStr).to_ulong();
+        fout.put(byte);
     }
-    Node* curr = root; // текущий узел в дереве
-    char bit;
-    while (compressedFile.read(&bit, 1)) {
-        if (bit == '0') { // если текущий бит 0, идем влево в дереве
-            curr = curr->left;
-        }
-        else { // иначе, идем вправо
-            curr = curr->right;
-        }
-        if (curr->left == nullptr && curr->right == nullptr);
-    } // если текущий узел-лист, то это и есть раскодированный символ
+    fout.close();
 }
