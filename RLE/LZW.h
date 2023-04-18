@@ -12,7 +12,7 @@ public:
 	~LZW();
 	void LZW_Compress(std::string input_file_name, std::string output_file_nam);
 	void LZW_Decompress(std::string input_file_name, std::string output_file_name);
-	std::map<std::string, int> dictionary;
+	std::vector<int> result;
 private:
 
 };
