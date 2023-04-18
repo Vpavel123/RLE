@@ -1,11 +1,4 @@
 ﻿#pragma once
-#include <iostream>
-#include <vector>
-#include <string>
-#include <fstream>
-#include <regex>
-#include <regex>
-
 
 using namespace System;
 using namespace System::ComponentModel;
@@ -15,28 +8,22 @@ using namespace System::Data;
 using namespace System::Drawing;
 
 
-
 namespace RLE {
-	ref class PageFile;
+
 	/// <summary>
 	/// Сводка для PageAnalysis
 	/// </summary>
 	public ref class PageAnalysis : public System::Windows::Forms::UserControl
 	{
 	public:
+		delegate void ComboBoxTextChangedEventHandler(System::Object^ sender, System::String^ text);
+		event ComboBoxTextChangedEventHandler^ ComboBoxTextChanged;
+
 		ref struct Compression
 		{
 			long rle, lzw, huffman;
 		};
 		Compression^ comp;
-
-		void AddNumber(long rle, long lzw, long huffman)
-		{
-			this->chart1->Series[0]->Points->Add(rle);
-			this->chart1->Series[1]->Points->Add(lzw);
-			this->chart1->Series[2]->Points->Add(huffman);
-		}
-
 		PageAnalysis(void)
 		{
 			comp = gcnew Compression();
@@ -44,40 +31,6 @@ namespace RLE {
 			//
 			//TODO: добавьте код конструктора
 			//
-			PageFile^ file = gcnew PageFile();
-			file->AddNumberEvent += gcnew PageFile::AddNumberEventHandler(this, &PageAnalysis::AddNumber);
-
-			/*static const std::regex r(R"(\d{0,9})");
-			static const std::regex regrle(R"(\brle\b)");
-			static const std::regex regrle1(R"(\blzw\b)");
-			static const std::regex regrle2(R"(\bhuffman\b)");
-			std::smatch m;
-			std::ifstream file("Analysis.txt");
-			std::vector<std::string> lines;
-			std::string line;
-			while (std::getline(file, line))
-			{
-				lines.push_back(line);
-				if (std::regex_search(line, m, regrle))
-				{
-					comp->rle = std::stol(line);
-				}
-
-				if (std::regex_search(line, m, regrle1))
-				{
-					comp->lzw = std::stol(line);
-				}
-
-				if (std::regex_search(line, m, regrle2))
-				{
-					comp->huffman = std::stol(line);
-				}
-			}*/
-
-
-			//this->chart1->Series[1]->Points->Add(comp->lzw);
-			//this->chart1->Series[2]->Points->Add(comp->huffman);
-
 		}
 
 	protected:
@@ -165,10 +118,8 @@ namespace RLE {
 
 		}
 #pragma endregion
-
-
 	private: System::Void PageAnalysis_Load(System::Object^ sender, System::EventArgs^ e) {
-	
+		this->chart1->Series[0]->Points->Add(comp->rle);
 	}
 };
 }

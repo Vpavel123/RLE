@@ -4,7 +4,6 @@
 #include "PageAnalysis.h"
 #include "LZW.h"
 #include "RLEencryption.h"
-#include <iostream>
 
 using namespace System;
 using namespace System::ComponentModel;
@@ -64,20 +63,6 @@ namespace RLE {
 		PageGeneral^ general;
 		PageAnalysis^ analysis;
 
-		delegate void AddNumberEventHandler(long rle, long lzw, long huffman);
-		event AddNumberEventHandler^ AddNumberEvent;
-
-		ref struct Compression
-		{
-			long rle, lzw, huffman;
-		};
-		Compression^ comp;
-
-		void OnAddNumberData(long rle, long lzw, long huffman)
-		{
-			AddNumberEvent(rle,lzw,huffman);
-		}
-
 		void UserControl1_ComboBoxTextChanged(System::Object^ sender, System::String^ text)
 		{
 			aboutToolStripMenuItem->Text = text;
@@ -85,7 +70,6 @@ namespace RLE {
 
 		PageFile(PageGeneral^ general, PageAnalysis^ analysis)
 		{
-			comp = gcnew Compression();
 			InitializeComponent();
 			//
 			//TODO: добавьте код конструктора
@@ -97,7 +81,6 @@ namespace RLE {
 			openFileDialog1->Filter = "Text files(*.txt)|*.txt|All files(*.*)|*.*";
 			saveFileDialog1->Filter = "Text files(*.txt)|*.txt|All files(*.*)|*.*";
 			menuStrip1->BackColor = System::Drawing::Color().FromArgb(51, 51, 77); 
-			remove("Analysis.txt");
 		}
 
 		PageFile(void)
@@ -958,16 +941,8 @@ namespace RLE {
 				//richTextBox1->Text = gcnew System::String(temp.c_str());
 
 				FileInfo^ info = gcnew FileInfo(saveFileDialog1->FileName);
-				//analysis->comp->rle = info->Length;
-
-				std::string line = std::to_string(info->Length);
-			
-				std::fstream fs;
-				fs.open("Analysis.txt", std::fstream::in | std::fstream::out | std::fstream::app);
-				fs << line << " " << "rle" << std::endl;
-				fs.close();
-				comp->rle = info->Length;
-				OnAddNumberData(comp->rle, comp->lzw, comp->huffman);
+				analysis->comp->rle = info->Length;
+				analysis->Update();
 			}
 		}
 		else if(aboutToolStripMenuItem->Text == "LZW")
@@ -985,16 +960,7 @@ namespace RLE {
 				std::string temp = rle->ReadFile(std::string(_ptr));
 
 				FileInfo^ info = gcnew FileInfo(saveFileDialog1->FileName);
-				//analysis->comp->lzw = info->Length;
-
-				std::string line = std::to_string(info->Length);
-
-				std::fstream fs;
-				fs.open("Analysis.txt", std::fstream::in | std::fstream::out | std::fstream::app);
-				fs << line << " " << "lzw" << std::endl;
-				fs.close();
-				comp->lzw = info->Length;
-				OnAddNumberData(comp->rle, comp->lzw, comp->huffman);
+				analysis->comp->lzw = info->Length;
 			}
 		}
 		else if (aboutToolStripMenuItem->Text == "Huffman compression")
@@ -1013,13 +979,6 @@ namespace RLE {
 
 				FileInfo^ info = gcnew FileInfo(saveFileDialog1->FileName);
 				analysis->comp->huffman = info->Length;
-
-				std::string line = std::to_string(info->Length);
-
-				std::fstream fs;
-				fs.open("Analysis.txt", std::fstream::in | std::fstream::out | std::fstream::app);
-				fs << line << " " << "huffman" << std::endl;
-				fs.close();
 			}
 		}
 	}
