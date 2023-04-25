@@ -1,127 +1,170 @@
 #pragma once
-#include <vector>
-#include <map>
+#include <iostream>
 #include <fstream>
-#include <list>
+#include <queue>
+#include <unordered_map>
+#include <vector>
+#include <bitset>
 
 class Huffman
 {
 public:
-    class Node
-    {
-    public:
-        int a;
-        char c;
-        Node* left, * right;
-
-        Node() { left = right = nullptr; }
-
-        Node(Node* L, Node* R)
-        {
-            left = L;
-            right = R;
-            a = L->a + R->a;
-        }
+    // Структура узла дерева Хаффмана
+    struct Node {
+        char ch;
+        int freq;
+        Node* left;
+        Node* right;
     };
 
-
-    struct MyCompare
-    {
-        bool operator()(const Node* l, const Node* r) const { return l->a < r->a; }
-    };
-
-
-    std::vector<bool> code;
-    std::map<char, std::vector<bool> > table;
-
-    void BuildTable(Node* root)
-    {
-        if (root->left != NULL)
-        {
-            code.push_back(0);
-            BuildTable(root->left);
-        }
-
-        if (root->right != NULL)
-        {
-            code.push_back(1);
-            BuildTable(root->right);
-        }
-
-        if (root->c) table[root->c] = code;
-
-        code.pop_back();
+    // Создание нового узла дерева Хаффмана
+    Node* newNode(char ch, int freq, Node* left, Node* right) {
+        Node* node = new Node;
+        node->ch = ch;
+        node->freq = freq;
+        node->left = left;
+        node->right = right;
+        return node;
     }
 
-    void Huffman_compress_file(std::string input_file_name, std::string output_file_name) 
-    {
-        std::ifstream f(input_file_name);
+    // Сравнение узлов дерева Хаффмана по частоте
+    struct compare {
+        bool operator()(Node* l, Node* r) {
+            return l->freq > r->freq;
+        }
+    };
 
-        std::map<char, int> m;
+    // Построение дерева Хаффмана на основе частоты символов
+    Node* buildHuffmanTree(std::unordered_map<char, int>& freq) {
+        std::priority_queue<Node*, std::vector<Node*>, compare> pq;
 
-        while (!f.eof())
-        {
-            char c = f.get();
-            m[c]++;
+        for (auto pair : freq) {
+            pq.push(newNode(pair.first, pair.second, nullptr, nullptr));
         }
 
-        ////// записываем начальные узлы в список list
-
-        std::list<Node*> t;
-        for (std::map<char, int>::iterator itr = m.begin(); itr != m.end(); ++itr)
-        {
-            Node* p = new Node;
-            p->c = itr->first;
-            p->a = itr->second;
-            t.push_back(p);
+        while (pq.size() != 1) {
+            Node* left = pq.top();
+            pq.pop();
+            Node* right = pq.top();
+            pq.pop();
+            int sum = left->freq + right->freq;
+            pq.push(newNode('\0', sum, left, right));
         }
 
-        //////  создаем дерево     
+        return pq.top();
+    }
 
-        while (t.size() != 1)
-        {
-            t.sort(MyCompare());
-
-            Node* SonL = t.front();
-            t.pop_front();
-            Node* SonR = t.front();
-            t.pop_front();
-
-            Node* parent = new Node(SonL, SonR);
-            t.push_back(parent);
-
+    // Создание таблицы кодирования символов на основе дерева Хаффмана
+    void encode(Node* root, std::string code, std::unordered_map<char, std::string>& huffmanCode) {
+        if (root == nullptr) {
+            return;
         }
 
-        Node* root = t.front();   //root - указатель на вершину дерева
+        if (root->left == nullptr && root->right == nullptr) {
+            huffmanCode[root->ch] = code;
+        }
 
-        ////// создаем пары 'символ-код':           
+        encode(root->left, code + "0", huffmanCode);
+        encode(root->right, code + "1", huffmanCode);
+    }
 
-        BuildTable(root);
+    // Запись таблицы кодирования в сжатый файл
+    void writeEncodingTable(std::unordered_map<char, std::string>& huffmanCode, std::ofstream& out) {
+        for (auto pair : huffmanCode) {
+            out << pair.first << " " << pair.second << std::endl;
+        }
+    }
 
-        f.clear(); f.seekg(0); // перемещаем указатель снова в начало файла
+    // Запись закодированных данных в сжатый файл
+    void writeEncodedData(std::string& data, std::unordered_map<char, std::string>& huffmanCode, std::ofstream& out) {
+        std::string encodedData = "";
+        for (char c : data) {
+            encodedData += huffmanCode[c];
+        }
 
-        std::ofstream g(output_file_name, std::ios::out | std::ios::binary);
+        int padding = 8 - encodedData.length() % 8;
+        for (int i = 0; i < padding; i++) {
+            encodedData += "0";
+        }
 
-        int count = 0; char buf = 0;
-        while (!f.eof())
-        {
-            char c = f.get();
-            std::vector<bool> x = table[c];
-            for (int n = 0; n < x.size(); n++)
-            {
-                buf = buf | x[n] << (7 - count);
-                count++;
-                if (count == 8) { count = 0;   g << buf; buf = 0; }
+        out << padding << std::endl;
+
+        for (int i = 0; i < encodedData.length(); i += 8) {
+            std::string byte = encodedData.substr(i, 8);
+            out << (char)std::bitset<8>(byte).to_ulong();
+        }
+    }
+
+    // Сжатие файла методом Хаффмана
+    void compressFile(std::string inputFile, std::string outputFile) {
+        std::ifstream in(inputFile, std::ios::binary);
+        std::ofstream out(outputFile, std::ios::binary);
+
+        std::unordered_map<char, int> freq;
+        char c;
+        while (in.get(c)) {
+            freq[c]++;
+        }
+
+        Node* root = buildHuffmanTree(freq);
+
+        std::unordered_map<char, std::string> huffmanCode;
+        encode(root, "", huffmanCode);
+
+        writeEncodingTable(huffmanCode, out);
+
+        in.clear();
+        in.seekg(0, std::ios::beg);
+
+        std::string data = "";
+        while (in.get(c)) {
+            data += c;
+        }
+
+        writeEncodedData(data, huffmanCode, out);
+
+        in.close();
+        out.close();
+    }
+
+    void decompressFile(std::string inputFile, std::string outputFile) {
+        // Чтение таблицы кодирования из входного файла
+        std::ifstream input(inputFile, std::ios::binary);
+        std::unordered_map& lt; std::string, char& gt; decodingTable;
+        std::string line;
+        while (getline(input, line)) {
+            char character = line[0];
+            std::string code = line.substr(1);
+            decodingTable[code] = character;
+        }
+        input.close();
+        // Чтение закодированного текста из входного файла
+        std::string encodedText = &quot;&quot;;
+        std::bitset& lt;8 & gt; bits;
+        input.open(inputFile, std::ios::binary);
+        input.seekg(0, std::ios::end);
+        int fileSize = input.tellg();
+        input.seekg(fileSize - 1, std::ios::beg);
+        char lastByte = input.get();
+        input.seekg(0, std::ios::beg);
+        while (input.get(bits)) {
+            encodedText += bits.to_string();
+        }
+        encodedText = encodedText.substr(0, encodedText.size() - 8) + std::bitset & lt;8 & gt;(lastByte).to_string();
+        // Раскодирование текста с использованием таблицы декодирования
+        std::string text = &quot;&quot;;
+        std::string code = &quot;&quot;;
+        for (char c : encodedText) {
+            code += c;
+            if (decodingTable.find(code) != decodingTable.end()) {
+                text += decodingTable[code];
+                code = &quot;&quot;;
             }
         }
-
-        f.close();
-        g.close();
-    }
-
-    void Huffman_Decompress(std::string input_file_name, std::string output_file_name)
-    {
-       
+        // Запись раскодированного текста в выходной файл
+        std::ofstream output(outputFile, std::ios::binary);
+        output& lt;&lt; text;
+        output.close();
     }
 };
 

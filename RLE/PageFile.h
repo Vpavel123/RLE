@@ -2,7 +2,7 @@
 #include <string>
 #include "PageGeneral.h"
 #include "LZW.h"
-#include "Huffman.h"
+#include "Huffman.cpp"
 #include "RLEencryption.h"
 #include <iostream>
 
@@ -61,6 +61,7 @@ namespace RLE {
 	public:
 		RLEencryption* rle;
 		LZW* lzw;
+		Huffman* huffman;
 		
 		PageGeneral^ general;
 
@@ -88,6 +89,7 @@ namespace RLE {
 			this->general = general;
 			lzw = new LZW();
 			rle = new RLEencryption();
+			huffman = new Huffman();
 			openFileDialog1->Filter = "Text files(*.txt)|*.txt|All files(*.*)|*.*";
 			saveFileDialog1->Filter = "Text files(*.txt)|*.txt|All files(*.*)|*.*";
 			menuStrip1->BackColor = System::Drawing::Color().FromArgb(51, 51, 77); 
@@ -984,7 +986,7 @@ namespace RLE {
 			{
 				String^ filenamesave = saveFileDialog1->FileName;
 				const char* _ptr = (const char*)(Marshal::StringToHGlobalAnsi(filenamesave)).ToPointer();
-				//compressFile(ptr, std::string(_ptr));
+				huffman->compressFile(std::string(ptr), std::string(_ptr));
 				std::string temp = rle->ReadFile(std::string(_ptr));
 				FileInfo^ info = gcnew FileInfo(saveFileDialog1->FileName);
 				comp->huffman = info->Length;
