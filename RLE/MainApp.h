@@ -228,7 +228,7 @@ namespace RLE {
 		}
 #pragma endregion
 	private: System::Void MainApp_Load(System::Object^ sender, System::EventArgs^ e) {
-		NavigationService::getInstance()->Navigate("Settings", label1, general, PagePanelControl);
+		NavigationService::getInstance()->Navigate("File", label1, file, PagePanelControl);
 	}
 	private: System::Void radioButton6_Click(System::Object^ sender, System::EventArgs^ e) {
 		NavigationService::getInstance()->Navigate("Analysis", label1, Analysis, PagePanelControl);

@@ -1,198 +1,410 @@
-#pragma once
+п»ї#pragma once
 #include <iostream>
-#include <fstream>
 #include <queue>
 #include <unordered_map>
-#include <vector>
-#include <bitset>
+#include <fstream>
 
-class Huffman
-{
+//class Huffman {
+//public:
+//	class Node
+//	{
+//	public:
+//		int a;
+//		char c;
+//		Node* left, * right;
+//
+//		Node() { left = right = NULL; }
+//
+//		Node(Node* L, Node* R)
+//		{
+//			left = L;
+//			right = R;
+//			a = L->a + R->a;
+//		}
+//	};
+//
+//
+//	struct MyCompare
+//	{
+//		bool operator()(const Node* l, const Node* r) const { return l->a < r->a; }
+//	};
+//
+//
+//	std::vector<bool> code;
+//	std::map<char, std::vector<bool> > table;
+//
+//	void BuildTable(Node* root)
+//	{
+//		if (root->left != NULL)
+//		{
+//			code.push_back(0);
+//			BuildTable(root->left);
+//		}
+//
+//		if (root->right != NULL)
+//		{
+//			code.push_back(1);
+//			BuildTable(root->right);
+//		}
+//
+//		if (root->left == NULL && root->right == NULL) table[root->c] = code;
+//
+//		if (code.empty() != true)
+//		{
+//			code.pop_back();
+//		}
+//	}
+//
+//	void compressFile(std::string input_text, std::string output_text)
+//	{
+//		std::ifstream f(input_text, std::ios::out | std::ios::binary);
+//
+//		std::map<char, int> m;
+//
+//		while (!f.eof())
+//		{
+//			char c = f.get();
+//			m[c]++;
+//		}
+//
+//
+//		////// Р·Р°РїРёСЃС‹РІР°РµРј РЅР°С‡Р°Р»СЊРЅС‹Рµ СѓР·Р»С‹ РІ СЃРїРёСЃРѕРє list
+//
+//		std::list<Node*> t;
+//		for (std::map<char, int>::iterator itr = m.begin(); itr != m.end(); ++itr)
+//		{
+//			Node* p = new Node;
+//			p->c = itr->first;
+//			p->a = itr->second;
+//			t.push_back(p);
+//		}
+//
+//
+//		//////  СЃРѕР·РґР°РµРј РґРµСЂРµРІРѕ		
+//
+//		while (t.size() != 1)
+//		{
+//			t.sort(MyCompare());
+//
+//			Node* SonL = t.front();
+//			t.pop_front();
+//			Node* SonR = t.front();
+//			t.pop_front();
+//
+//			Node* parent = new Node(SonL, SonR);
+//			t.push_back(parent);
+//
+//		}
+//
+//		Node* root = t.front();   //root - СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РІРµСЂС€РёРЅСѓ РґРµСЂРµРІР°
+//
+//		////// СЃРѕР·РґР°РµРј РїР°СЂС‹ 'СЃРёРјРІРѕР»-РєРѕРґ':			
+//
+//		BuildTable(root);
+//
+//		////// Р’С‹РІРѕРґРёРј РєРѕРґС‹ РІ С„Р°Р№Р» output.txt
+//
+//		f.clear(); f.seekg(0); // РїРµСЂРµРјРµС‰Р°РµРј СѓРєР°Р·Р°С‚РµР»СЊ СЃРЅРѕРІР° РІ РЅР°С‡Р°Р»Рѕ С„Р°Р№Р»Р°
+//
+//		std::ofstream g(output_text, std::ios::out | std::ios::binary);
+//
+//		int count = 0; char buf = 0;
+//		while (!f.eof())
+//		{
+//			char c = f.get();
+//			std::vector<bool> x = table[c];
+//			for (int n = 0; n < x.size(); n++)
+//			{
+//				buf = buf | x[n] << (7 - count);
+//				count++;
+//				if (count == 8) { count = 0;   g << buf; buf = 0; }
+//			}
+//		}
+//
+//		f.close();
+//		g.close();
+//
+//		///// СЃС‡РёС‚С‹РІР°РЅРёРµ РёР· С„Р°Р№Р»Р° output.txt Рё РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ РѕР±СЂР°С‚РЅРѕ
+//
+//		//std::ifstream F(output_text, std::ios::in | std::ios::binary);
+//
+//		//setlocale(LC_ALL, "Russian"); // С‡С‚РѕР± СЂСѓСЃСЃРєРёРµ СЃРёРјРІРѕР»С‹ РѕС‚РѕР±СЂР°Р¶Р°Р»РёСЃСЊ РІ РєРѕРјР°РЅРґРЅРѕР№ СЃС‚СЂРѕРєРµ
+//
+//		//Node* p = root;
+//		//count = 0; char byte;
+//		//byte = F.get();
+//		//while (!F.eof())
+//		//{
+//		//	bool b = byte & (1 << (7 - count));
+//		//	if (b) p = p->right; else p = p->left;
+//		//	if (p->left == NULL && p->right == NULL) { std::cout << p->c; p = root; }
+//		//	count++;
+//		//	if (count == 8) { count = 0; byte = F.get(); }
+//		//}
+//
+//		//F.close();
+//	}
+//
+//	void DecompressFile(std::string input_text, std::string output_text)
+//	{
+//		std::ifstream f(input_text, std::ios::in | std::ios::binary);
+//		std::ofstream g(output_text, std::ios::out | std::ios::binary);
+//
+//		std::map<char, int> m;
+//
+//		while (!f.eof())
+//		{
+//			char c = f.get();
+//			m[c]++;
+//		}
+//
+//
+//		////// Р·Р°РїРёСЃС‹РІР°РµРј РЅР°С‡Р°Р»СЊРЅС‹Рµ СѓР·Р»С‹ РІ СЃРїРёСЃРѕРє list
+//
+//		std::list<Node*> t;
+//		for (std::map<char, int>::iterator itr = m.begin(); itr != m.end(); ++itr)
+//		{
+//			Node* p = new Node;
+//			p->c = itr->first;
+//			p->a = itr->second;
+//			t.push_back(p);
+//		}
+//
+//
+//		//////  СЃРѕР·РґР°РµРј РґРµСЂРµРІРѕ		
+//
+//		while (t.size() != 1)
+//		{
+//			t.sort(MyCompare());
+//
+//			Node* SonL = t.front();
+//			t.pop_front();
+//			Node* SonR = t.front();
+//			t.pop_front();
+//
+//			Node* parent = new Node(SonL, SonR);
+//			t.push_back(parent);
+//
+//		}
+//
+//		Node* root = t.front();   //root - СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РІРµСЂС€РёРЅСѓ РґРµСЂРµРІР°
+//
+//		////// СЃРѕР·РґР°РµРј РїР°СЂС‹ 'СЃРёРјРІРѕР»-РєРѕРґ':			
+//
+//		BuildTable(root);
+//
+//		////// Р’С‹РІРѕРґРёРј РєРѕРґС‹ РІ С„Р°Р№Р» output.txt
+//		f.clear(); f.seekg(0); // РїРµСЂРµРјРµС‰Р°РµРј СѓРєР°Р·Р°С‚РµР»СЊ СЃРЅРѕРІР° РІ РЅР°С‡Р°Р»Рѕ С„Р°Р№Р»Р°
+//
+//		setlocale(LC_ALL, "Russian"); // С‡С‚РѕР± СЂСѓСЃСЃРєРёРµ СЃРёРјРІРѕР»С‹ РѕС‚РѕР±СЂР°Р¶Р°Р»РёСЃСЊ РІ РєРѕРјР°РЅРґРЅРѕР№ СЃС‚СЂРѕРєРµ
+//		Node* p = root;
+//		int count = 0; char byte = 0;
+//		byte = f.get();
+//		while (!f.eof())
+//		{
+//			bool b = byte & (1 << (7 - count));
+//			if (b)
+//			{
+//				p = p->right;
+//			}
+//			else 
+//			{
+//				p = p->left;
+//			}
+//
+//			if (p->left == NULL && p->right == NULL) 
+//			{ 
+//				std::cout << p->c; 
+//				p = root; 
+//			}
+//			count++;
+//			if (count == 8) 
+//			{ 
+//				count = 0; 
+//				byte = f.get(); 
+//			}
+//		}
+//
+//		f.close();
+//		g.close();
+//	}
+//};
+
+class Huffman {
 public:
-    // Структура узла дерева Хаффмана
-    struct Node {
+    // РЎС‚СЂСѓРєС‚СѓСЂР° РґР»СЏ СѓР·Р»Р° РґРµСЂРµРІР° РҐР°С„С„РјР°РЅР°
+    struct Node
+    {
         char ch;
         int freq;
-        Node* left;
-        Node* right;
+        Node* left, * right;
+
+        Node(char ch, int freq, Node* left, Node* right) : ch(ch), freq(freq), left(left), right(right) {}
     };
 
-    // Создание нового узла дерева Хаффмана
-    Node* newNode(char ch, int freq, Node* left, Node* right) {
-        Node* node = new Node;
-        node->ch = ch;
-        node->freq = freq;
-        node->left = left;
-        node->right = right;
-        return node;
-    }
-
-    // Сравнение узлов дерева Хаффмана по частоте
-    struct compare {
-        bool operator()(Node* l, Node* r) {
-            return l->freq > r->freq;
+    // РЎСЂР°РІРЅРµРЅРёРµ СѓР·Р»РѕРІ РґРµСЂРµРІР° РїРѕ РёС… С‡Р°СЃС‚РѕС‚Рµ
+    struct compareNodes
+    {
+        bool operator()(Node* left, Node* right)
+        {
+            return left->freq > right->freq;
         }
     };
 
-    // Построение дерева Хаффмана на основе частоты символов
-    Node* buildHuffmanTree(std::unordered_map<char, int>& freq) {
-        std::priority_queue<Node*, std::vector<Node*>, compare> pq;
-
-        for (auto pair : freq) {
-            pq.push(newNode(pair.first, pair.second, nullptr, nullptr));
+    // РЎРѕР·РґР°РЅРёРµ РґРµСЂРµРІР° РҐР°С„С„РјР°РЅР°
+    Node* buildHuffmanTree(std::string text)
+    {
+        // РџРѕРґСЃС‡РµС‚ С‡Р°СЃС‚РѕС‚С‹ СЃРёРјРІРѕР»РѕРІ
+        std::unordered_map<char, int> freq;
+        for (char c : text)
+        {
+            freq[c]++;
         }
 
-        while (pq.size() != 1) {
+        // РЎРѕР·РґР°РЅРёРµ РѕС‡РµСЂРµРґРё СЃ РїСЂРёРѕСЂРёС‚РµС‚Р°РјРё
+        std::priority_queue<Node*, std::vector<Node*>, compareNodes> pq;
+        for (auto pair : freq)
+        {
+            pq.push(new Node(pair.first, pair.second, nullptr, nullptr));
+        }
+
+        // РЎС‚СЂРѕРёРј РґРµСЂРµРІРѕ РҐР°С„С„РјР°РЅР° РёР· СѓР·Р»РѕРІ РёР· РѕС‡РµСЂРµРґРё
+        while (pq.size() > 1)
+        {
             Node* left = pq.top();
             pq.pop();
             Node* right = pq.top();
             pq.pop();
-            int sum = left->freq + right->freq;
-            pq.push(newNode('\0', sum, left, right));
+
+            pq.push(new Node('\0', left->freq + right->freq, left, right));
         }
 
         return pq.top();
     }
 
-    // Создание таблицы кодирования символов на основе дерева Хаффмана
-    void encode(Node* root, std::string code, std::unordered_map<char, std::string>& huffmanCode) {
-        if (root == nullptr) {
+    // Р РµРєСѓСЂСЃРёРІРЅРѕ РїСЂРѕС…РѕРґРёРј РїРѕ РґРµСЂРµРІСѓ Рё Р·Р°РїРёСЃС‹РІР°РµРј РєРѕРґРёСЂРѕРІР°РЅРЅС‹Р№ С‚РµРєСЃС‚ РІ РјР°РїСѓ
+    void encode(Node* node, std::string code, std::unordered_map<char, std::string>& encoding)
+    {
+        if (node == nullptr)
+        {
             return;
         }
 
-        if (root->left == nullptr && root->right == nullptr) {
-            huffmanCode[root->ch] = code;
+        if (node->left == nullptr && node->right == nullptr)
+        {
+            encoding[node->ch] = code;
         }
 
-        encode(root->left, code + "0", huffmanCode);
-        encode(root->right, code + "1", huffmanCode);
+        encode(node->left, code + '0', encoding);
+        encode(node->right, code + '1', encoding);
     }
 
-    // Запись таблицы кодирования в сжатый файл
-    void writeEncodingTable(std::unordered_map<char, std::string>& huffmanCode, std::ofstream& out) {
-        for (auto pair : huffmanCode) {
-            out << pair.first << " " << pair.second << std::endl;
+    // РљРѕРґРёСЂСѓРµРј С‚РµРєСЃС‚ СЃ РїРѕРјРѕС‰СЊСЋ РґРµСЂРµРІР° РҐР°С„С„РјР°РЅР° Рё РІРѕР·РІСЂР°С‰Р°РµРј СЃС‚СЂРѕРєСѓ СЃ Р±РёС‚РѕРІРѕР№ Р·Р°РїРёСЃСЊСЋ
+    std::string encodeText(std::string text, std::unordered_map<char, std::string> encoding)
+    {
+        std::string result = "";
+        for (char c : text)
+        {
+            result += encoding[c];
         }
+
+        return result;
     }
 
-    // Запись закодированных данных в сжатый файл
-    void writeEncodedData(std::string& data, std::unordered_map<char, std::string>& huffmanCode, std::ofstream& out) {
-        std::string encodedData = "";
-        for (char c : data) {
-            encodedData += huffmanCode[c];
+    // Р Р°СЃРєРѕРґРёСЂСѓРµРј С‚РµРєСЃС‚, РёСЃРїРѕР»СЊР·СѓСЏ РґРµСЂРµРІРѕ РҐР°С„С„РјР°РЅР°
+    std::string decodeText(std::string encodedText, Node* root)
+    {
+        std::string result = "";
+        Node* node = root;
+        for (char bit : encodedText)
+        {
+            if (node->left == nullptr && node->right == nullptr)
+            {
+                result += node->ch;
+                node = root;
+            }
+
+            if (bit == '0')
+            {
+                node = node->left;
+            }
+            else
+            {
+                node = node->right;
+            }
         }
 
-        int padding = 8 - encodedData.length() % 8;
-        for (int i = 0; i < padding; i++) {
-            encodedData += "0";
+        if (node->left == nullptr && node->right == nullptr)
+        {
+            result += node->ch;
         }
 
-        out << padding << std::endl;
-
-        for (int i = 0; i < encodedData.length(); i += 8) {
-            std::string byte = encodedData.substr(i, 8);
-            out << (char)std::bitset<8>(byte).to_ulong();
-        }
+        return result;
     }
 
-    // Сжатие файла методом Хаффмана
-    void compressFile(std::string inputFile, std::string outputFile) {
+    // РљРѕРґРёСЂРѕРІРєР° С„Р°Р№Р»Р° СЃ РїРѕРјРѕС‰СЊСЋ Р°Р»РіРѕСЂРёС‚РјР° РҐР°С„С„РјР°РЅР°
+    void encodeFile(std::string inputFile, std::string outputFile)
+    {
+        // Р§РёС‚Р°РµРј С„Р°Р№Р»
         std::ifstream in(inputFile, std::ios::binary);
-        std::ofstream out(outputFile, std::ios::binary);
-
-        std::unordered_map<char, int> freq;
-        char c;
-        while (in.get(c)) {
-            freq[c]++;
-        }
-
-        Node* root = buildHuffmanTree(freq);
-
-        std::unordered_map<char, std::string> huffmanCode;
-        encode(root, "", huffmanCode);
-
-        writeEncodingTable(huffmanCode, out);
-
-        in.clear();
-        in.seekg(0, std::ios::beg);
-
-        std::string data = "";
-        while (in.get(c)) {
-            data += c;
-        }
-
-        writeEncodedData(data, huffmanCode, out);
-
+        std::string text((std::istreambuf_iterator<char>(in)), (std::istreambuf_iterator<char>()));
         in.close();
+
+        // РЎРѕР·РґР°РЅРёРµ РґРµСЂРµРІР° РҐР°С„С„РјР°РЅР° Рё С‚Р°Р±Р»РёС†С‹ РєРѕРґРёСЂРѕРІРєРё
+        Node* root = buildHuffmanTree(text);
+        std::unordered_map<char, std::string> encoding;
+        encode(root, "", encoding);
+
+        // РљРѕРґРёСЂСѓРµРј С‚РµРєСЃС‚ Рё Р·Р°РїРёСЃС‹РІР°РµРј Р±РёС‚РѕРІСѓСЋ Р·Р°РїРёСЃСЊ РІ С„Р°Р№Р»
+        std::string encodedText = encodeText(text, encoding);
+        std::ofstream out(outputFile, std::ios::out | std::ios::binary);
+        out.write((char*)&encoding, sizeof(encoding));
+        out.write((char*)&encodedText[0], encodedText.size());
         out.close();
     }
 
-    void decompressFile(std::string inputFile, std::string outputFile) {
-        // Чтение таблицы кодирования из входного файла
-        std::ifstream input(inputFile, std::ios::binary);
-        std::unordered_map<std::string, char> decodingTable;
-        std::string line;
-        while (getline(input, line)) {
-            char character = line[0];
-            std::string code = line.substr(1);
-            decodingTable[code] = character;
-        }
-        input.close();
-        // Чтение закодированного текста из входного файла
-        std::string encodedText = "";
-        std::bitset<8> bits;
-        input.open(inputFile, std::ios::binary);
-        input.seekg(0, std::ios::end);
-        int fileSize = input.tellg();
-        input.seekg(fileSize - 1, std::ios::beg);
-        char lastByte = input.get();
-        input.seekg(0, std::ios::beg);
-        while (input.get(bits)) {
-            encodedText += bits.to_string();
-        }
-        encodedText = encodedText.substr(0, encodedText.size() - 8) + std::bitset<8>(lastByte).to_string();
-        // Раскодирование текста с использованием таблицы декодирования
-        std::string text = "";
-        std::string code = "";
-        for (char c : encodedText) {
-            code += c;
-            if (decodingTable.find(code) != decodingTable.end()) {
-                text += decodingTable[code];
-                code = "";
+    // Р Р°СЃРєРѕРґРёСЂРѕРІРєР° С„Р°Р№Р»Р° СЃ РїРѕРјРѕС‰СЊСЋ Р°Р»РіРѕСЂРёС‚РјР° РҐР°С„С„РјР°РЅР°
+    void decodeFile(std::string inputFile, std::string outputFile)
+    {
+        // Р§РёС‚Р°РµРј С„Р°Р№Р»
+        std::ifstream in(inputFile, std::ios::binary);
+        std::unordered_map<char, std::string> encoding;
+        in.read((char*)&encoding, sizeof(encoding));
+
+        // РЎРѕР·РґР°РµРј
+        // РґРµСЂРµРІРѕ РҐР°С„С„РјР°РЅР° РёР· С‚Р°Р±Р»РёС†С‹ РєРѕРґРёСЂРѕРІРєРё
+        Node* root = new Node('\0', 0, nullptr, nullptr);
+        for (auto pair : encoding)
+        {
+            Node* node = root;
+            for (char bit : pair.second)
+            {
+                if (bit == '0')
+                {
+                    if (node->left == nullptr)
+                    {
+                        node->left = new Node('\0', 0, nullptr, nullptr);
+                    }
+                    node = node->left;
+                }
+                else
+                {
+                    if (node->right == nullptr)
+                    {
+                        node->right = new Node('\0', 0, nullptr, nullptr);
+                    }
+                    node = node->right;
+                }
             }
+            node->ch = pair.first;
         }
-        // Запись раскодированного текста в выходной файл
-        std::ofstream output(outputFile, std::ios::binary);
-        output << text;
-        output.close();
+
+        // Р Р°СЃРєРѕРґРёСЂСѓРµРј Р±РёС‚РѕРІСѓСЋ Р·Р°РїРёСЃСЊ Рё Р·Р°РїРёСЃС‹РІР°РµРј СЂР°СЃРєРѕРґРёСЂРѕРІР°РЅРЅС‹Р№ С‚РµРєСЃС‚ РІ С„Р°Р№Р»
+        std::string encodedText((std::istreambuf_iterator<char>(in)), (std::istreambuf_iterator<char>()));
+        in.close();
+        std::string decodedText = decodeText(encodedText, root);
+        std::ofstream out(outputFile, std::ios::out | std::ios::binary);
+        out.write((char*)&decodedText[0], decodedText.size());
+        out.close();
     }
 };
-
-
-//int main(int argc, char* argv[])
-//{
-//    ////// считаем частоты символов   
-//
-//
-//    ///// считывание из файла output.txt и преобразование обратно
-//
-//    std::ifstream F("output.txt", std::ios::in | std::ios::binary);
-//
-//    setlocale(LC_ALL, "Russian"); // чтоб русские символы отображались в командной строке
-//
-//    Node* p = root;
-//    count = 0; char byte;
-//    byte = F.get();
-//    while (!F.eof())
-//    {
-//        bool b = byte & (1 << (7 - count));
-//        if (b) p = p->right; else p = p->left;
-//        if (p->left == NULL && p->right == NULL) { std::cout << p->c; p = root; }
-//        count++;
-//        if (count == 8) { count = 0; byte = F.get(); }
-//    }
-//
-//    F.close();
-//
-//    return 0;
-//}

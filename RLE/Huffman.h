@@ -1,100 +1,101 @@
-#pragma once
-//#include <iostream>
-//#include <fstream>
-//#include <queue>
-//#include <unordered_map>
-//#include <bitset>
-//
-//// Структура узла дерева Хаффмана
+#include <iostream>
+#include <queue>
+#include <unordered_map>
+#include <vector>
+#include <fstream>
+#include <string>
+
+//class Huffman{
+//public:
 //struct Node {
 //    char ch;
 //    int freq;
-//    Node* left;
-//    Node* right;
-//    Node(char ch, int freq, Node* left = nullptr, Node* right = nullptr) {
-//        this->ch = ch;
-//        this->freq = freq;
-//        this->left = left;
-//        this->right = right;
-//    }
+//    Node* left, * right;
+//
+//    Node(char ch, int freq) : ch(ch), freq(freq), left(nullptr), right(nullptr) {}
+//
+//    bool isLeaf() const { return left == nullptr && right == nullptr; }
 //};
 //
-//// Сравнение узлов дерева Хаффмана по частоте
-//struct Compare {
-//    bool operator()(Node* a, Node* b) {
-//        return a->freq > b->freq;
-//    }
+//struct comp {
+//    bool operator()(Node* l, Node* r) { return l->freq > r->freq; }
 //};
 //
+//void encode(Node* root, std::string str, std::unordered_map<char, std::string>& huffmanCode) {
+//    if (root == nullptr) return;
 //
-//// Построение дерева Хаффмана
-//Node* buildHuffmanTree(std::unordered_map<char, int>& freq) {
-//    std::priority_queue<Node*, std::vector<Node*>, Compare> pq;
-//    for (auto& p : freq) {
-//        pq.push(new Node(p.first, p.second));
+//    if (root->isLeaf()) {
+//        huffmanCode[root->ch] = str;
 //    }
-//    while (pq.size() > 1) {
-//        Node* left = pq.top(); pq.pop();
-//        Node* right = pq.top(); pq.pop();
-//        Node* parent = new Node('\0', left->freq + right->freq, left, right);
-//        pq.push(parent);
-//    }
-//    return pq.top();
+//
+//    encode(root->left, str + "0", huffmanCode);
+//    encode(root->right, str + "1", huffmanCode);
 //}
 //
-//// Создание таблицы кодирования
-//void createEncodingTable(Node* root, std::string code, std::unordered_map<char, std::string>& table) {
-//    if (!root) return;
-//    if (!root->left && !root->right) {
-//        table[root->ch] = code;
-//    }
-//    createEncodingTable(root->left, code + "0", table);
-//    createEncodingTable(root->right, code + "1", table);
-//}
-//
-//// Сжатие файла методом Хаффмана
-//void compressFile(std::string inputFile, std::string outputFile) {
-//    // Считываем исходный файл и подсчитываем частоту встречаемости каждого символа в нем
+//std::unordered_map<char, std::string> buildHuffmanTree(std::string text) {
 //    std::unordered_map<char, int> freq;
-//    std::ifstream fin(inputFile);
-//    char ch;
-//    while (fin.get(ch)) {
+//    for (char ch : text) {
 //        freq[ch]++;
 //    }
-//    fin.close();
 //
-//    // Построение дерева Хаффмана
-//    Node* root = buildHuffmanTree(freq);
+//    std::priority_queue<Node*, std::vector<Node*>, comp> pq;
 //
-//    // Создание таблицы кодирования
-//    std::unordered_map<char, std::string> encodingTable;
-//    createEncodingTable(root, "", encodingTable);
-//
-//    // Записываем таблицу кодирования в сжатый файл
-//    std::ofstream fout(outputFile);
-//    for (auto& p : encodingTable) {
-//        fout << p.first << " " << p.second << std::endl;
+//    for (auto pair : freq) {
+//        pq.push(new Node(pair.first, pair.second));
 //    }
-//    fout << std::endl;
 //
-//    // Считываем исходный файл еще раз и заменяем каждый символ на его код из таблицы кодирования
-//    fin.open(inputFile);
-//    std::string encodedStr = "";
-//    while (fin.get(ch)) {
-//        encodedStr += encodingTable[ch];
-//    }
-//    fin.close();
+//    while (pq.size() != 1) {
+//        Node* left = pq.top();
+//        pq.pop();
+//        Node* right = pq.top();
+//        pq.pop();
 //
-//    // Записываем закодированный файл в сжатый файл
-//    int padding = 8 - encodedStr.length() % 8;
-//    for (int i = 0; i < padding; i++) {
-//        encodedStr += "0";
+//        int sum = left->freq + right->freq;
+//        Node* parent = new Node('\0', sum);
+//        parent->left = left;
+//        parent->right = right;
+//
+//        pq.push(parent);
 //    }
-//    fout << padding << std::endl;
-//    for (int i = 0; i < encodedStr.length(); i += 8) {
-//        std::string byteStr = encodedStr.substr(i, 8);
-//        char byte = std::bitset<8>(byteStr).to_ulong();
-//        fout.put(byte);
-//    }
-//    fout.close();
+//
+//    std::unordered_map<char, std::string> huffmanCode;
+//    encode(pq.top(), "", huffmanCode);
+//
+//    return huffmanCode;
 //}
+//
+//std::string compressString(std::string text, std::unordered_map<char, std::string> huffmanCode) {
+//    std::string compressedTxt = "";
+//    for (char ch : text) {
+//        compressedTxt += huffmanCode[ch];
+//    }
+//    return compressedTxt;
+//}
+//
+//void compressFile(std::string input_text, std::string output_text)
+//{
+//    std::ifstream f(input_text, std::ios::binary);
+//    std::string line;
+//    if (f.is_open())
+//    {
+//        while (std::getline(f, line))
+//        {
+//            std::cout << line << std::endl;
+//        }
+//    }
+//    f.close();     // ��������� ����
+//
+//    std::unordered_map<char, std::string> huffmanCode = buildHuffmanTree(line);
+//    std::string compressedText = compressString(line, huffmanCode);
+//
+//    std::ofstream out(output_text, std::ios::binary);
+//    if (out.is_open())
+//    {
+//        out << line << std::endl;
+//    }
+//    out.close();
+//
+//    std::cout << "The original text is: " << line << std::endl;
+//    std::cout << "The compressed text is: " << compressedText << std::endl;
+//}
+//};
