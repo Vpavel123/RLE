@@ -130,7 +130,7 @@ public:
     void decompressFile(std::string inputFile, std::string outputFile) {
         // Чтение таблицы кодирования из входного файла
         std::ifstream input(inputFile, std::ios::binary);
-        std::unordered_map& lt; std::string, char& gt; decodingTable;
+        std::unordered_map<std::string, char> decodingTable;
         std::string line;
         while (getline(input, line)) {
             char character = line[0];
@@ -139,8 +139,8 @@ public:
         }
         input.close();
         // Чтение закодированного текста из входного файла
-        std::string encodedText = &quot;&quot;;
-        std::bitset& lt;8 & gt; bits;
+        std::string encodedText = "";
+        std::bitset<8> bits;
         input.open(inputFile, std::ios::binary);
         input.seekg(0, std::ios::end);
         int fileSize = input.tellg();
@@ -150,20 +150,20 @@ public:
         while (input.get(bits)) {
             encodedText += bits.to_string();
         }
-        encodedText = encodedText.substr(0, encodedText.size() - 8) + std::bitset & lt;8 & gt;(lastByte).to_string();
+        encodedText = encodedText.substr(0, encodedText.size() - 8) + std::bitset<8>(lastByte).to_string();
         // Раскодирование текста с использованием таблицы декодирования
-        std::string text = &quot;&quot;;
-        std::string code = &quot;&quot;;
+        std::string text = "";
+        std::string code = "";
         for (char c : encodedText) {
             code += c;
             if (decodingTable.find(code) != decodingTable.end()) {
                 text += decodingTable[code];
-                code = &quot;&quot;;
+                code = "";
             }
         }
         // Запись раскодированного текста в выходной файл
         std::ofstream output(outputFile, std::ios::binary);
-        output& lt;&lt; text;
+        output << text;
         output.close();
     }
 };
