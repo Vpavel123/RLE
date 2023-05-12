@@ -986,8 +986,7 @@ namespace RLE {
 			{
 				String^ filenamesave = saveFileDialog1->FileName;
 				const char* _ptr = (const char*)(Marshal::StringToHGlobalAnsi(filenamesave)).ToPointer();
-				//huffman->encodeFile(std::string(ptr), std::string(_ptr));
-				huffman->encodeFile(std::string(ptr), "HuffmanEncode.bin");
+				huffman->compressFile(std::string(ptr), std::string(_ptr));
 				std::string temp = rle->ReadFile(std::string(_ptr));
 				FileInfo^ info = gcnew FileInfo(saveFileDialog1->FileName);
 				comp->huffman = info->Length;
@@ -1041,7 +1040,7 @@ namespace RLE {
 			{
 				String^ filenamesave = saveFileDialog1->FileName;
 				const char* _ptr = (const char*)(Marshal::StringToHGlobalAnsi(filenamesave)).ToPointer();
-				huffman->decodeFile(std::string(ptr), std::string(_ptr));
+				huffman->decompressFile(std::string(ptr), std::string(_ptr));
 				std::string temp = rle->ReadFile(std::string(_ptr));
 			}
 		}

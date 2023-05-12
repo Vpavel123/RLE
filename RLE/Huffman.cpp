@@ -2,409 +2,174 @@
 #include <iostream>
 #include <queue>
 #include <unordered_map>
+#include <vector>
+#include <string>
 #include <fstream>
-
-//class Huffman {
-//public:
-//	class Node
-//	{
-//	public:
-//		int a;
-//		char c;
-//		Node* left, * right;
-//
-//		Node() { left = right = NULL; }
-//
-//		Node(Node* L, Node* R)
-//		{
-//			left = L;
-//			right = R;
-//			a = L->a + R->a;
-//		}
-//	};
-//
-//
-//	struct MyCompare
-//	{
-//		bool operator()(const Node* l, const Node* r) const { return l->a < r->a; }
-//	};
-//
-//
-//	std::vector<bool> code;
-//	std::map<char, std::vector<bool> > table;
-//
-//	void BuildTable(Node* root)
-//	{
-//		if (root->left != NULL)
-//		{
-//			code.push_back(0);
-//			BuildTable(root->left);
-//		}
-//
-//		if (root->right != NULL)
-//		{
-//			code.push_back(1);
-//			BuildTable(root->right);
-//		}
-//
-//		if (root->left == NULL && root->right == NULL) table[root->c] = code;
-//
-//		if (code.empty() != true)
-//		{
-//			code.pop_back();
-//		}
-//	}
-//
-//	void compressFile(std::string input_text, std::string output_text)
-//	{
-//		std::ifstream f(input_text, std::ios::out | std::ios::binary);
-//
-//		std::map<char, int> m;
-//
-//		while (!f.eof())
-//		{
-//			char c = f.get();
-//			m[c]++;
-//		}
-//
-//
-//		////// записываем начальные узлы в список list
-//
-//		std::list<Node*> t;
-//		for (std::map<char, int>::iterator itr = m.begin(); itr != m.end(); ++itr)
-//		{
-//			Node* p = new Node;
-//			p->c = itr->first;
-//			p->a = itr->second;
-//			t.push_back(p);
-//		}
-//
-//
-//		//////  создаем дерево		
-//
-//		while (t.size() != 1)
-//		{
-//			t.sort(MyCompare());
-//
-//			Node* SonL = t.front();
-//			t.pop_front();
-//			Node* SonR = t.front();
-//			t.pop_front();
-//
-//			Node* parent = new Node(SonL, SonR);
-//			t.push_back(parent);
-//
-//		}
-//
-//		Node* root = t.front();   //root - указатель на вершину дерева
-//
-//		////// создаем пары 'символ-код':			
-//
-//		BuildTable(root);
-//
-//		////// Выводим коды в файл output.txt
-//
-//		f.clear(); f.seekg(0); // перемещаем указатель снова в начало файла
-//
-//		std::ofstream g(output_text, std::ios::out | std::ios::binary);
-//
-//		int count = 0; char buf = 0;
-//		while (!f.eof())
-//		{
-//			char c = f.get();
-//			std::vector<bool> x = table[c];
-//			for (int n = 0; n < x.size(); n++)
-//			{
-//				buf = buf | x[n] << (7 - count);
-//				count++;
-//				if (count == 8) { count = 0;   g << buf; buf = 0; }
-//			}
-//		}
-//
-//		f.close();
-//		g.close();
-//
-//		///// считывание из файла output.txt и преобразование обратно
-//
-//		//std::ifstream F(output_text, std::ios::in | std::ios::binary);
-//
-//		//setlocale(LC_ALL, "Russian"); // чтоб русские символы отображались в командной строке
-//
-//		//Node* p = root;
-//		//count = 0; char byte;
-//		//byte = F.get();
-//		//while (!F.eof())
-//		//{
-//		//	bool b = byte & (1 << (7 - count));
-//		//	if (b) p = p->right; else p = p->left;
-//		//	if (p->left == NULL && p->right == NULL) { std::cout << p->c; p = root; }
-//		//	count++;
-//		//	if (count == 8) { count = 0; byte = F.get(); }
-//		//}
-//
-//		//F.close();
-//	}
-//
-//	void DecompressFile(std::string input_text, std::string output_text)
-//	{
-//		std::ifstream f(input_text, std::ios::in | std::ios::binary);
-//		std::ofstream g(output_text, std::ios::out | std::ios::binary);
-//
-//		std::map<char, int> m;
-//
-//		while (!f.eof())
-//		{
-//			char c = f.get();
-//			m[c]++;
-//		}
-//
-//
-//		////// записываем начальные узлы в список list
-//
-//		std::list<Node*> t;
-//		for (std::map<char, int>::iterator itr = m.begin(); itr != m.end(); ++itr)
-//		{
-//			Node* p = new Node;
-//			p->c = itr->first;
-//			p->a = itr->second;
-//			t.push_back(p);
-//		}
-//
-//
-//		//////  создаем дерево		
-//
-//		while (t.size() != 1)
-//		{
-//			t.sort(MyCompare());
-//
-//			Node* SonL = t.front();
-//			t.pop_front();
-//			Node* SonR = t.front();
-//			t.pop_front();
-//
-//			Node* parent = new Node(SonL, SonR);
-//			t.push_back(parent);
-//
-//		}
-//
-//		Node* root = t.front();   //root - указатель на вершину дерева
-//
-//		////// создаем пары 'символ-код':			
-//
-//		BuildTable(root);
-//
-//		////// Выводим коды в файл output.txt
-//		f.clear(); f.seekg(0); // перемещаем указатель снова в начало файла
-//
-//		setlocale(LC_ALL, "Russian"); // чтоб русские символы отображались в командной строке
-//		Node* p = root;
-//		int count = 0; char byte = 0;
-//		byte = f.get();
-//		while (!f.eof())
-//		{
-//			bool b = byte & (1 << (7 - count));
-//			if (b)
-//			{
-//				p = p->right;
-//			}
-//			else 
-//			{
-//				p = p->left;
-//			}
-//
-//			if (p->left == NULL && p->right == NULL) 
-//			{ 
-//				std::cout << p->c; 
-//				p = root; 
-//			}
-//			count++;
-//			if (count == 8) 
-//			{ 
-//				count = 0; 
-//				byte = f.get(); 
-//			}
-//		}
-//
-//		f.close();
-//		g.close();
-//	}
-//};
 
 class Huffman {
 public:
-    // Структура для узла дерева Хаффмана
-    struct Node
-    {
-        char ch;
-        int freq;
-        Node* left, * right;
+struct Node {
+    char ch;
+    int freq;
+    Node* left, * right;
 
-        Node(char ch, int freq, Node* left, Node* right) : ch(ch), freq(freq), left(left), right(right) {}
-    };
+    Node(char ch, int freq) : ch(ch), freq(freq), left(nullptr), right(nullptr) {}
 
-    // Сравнение узлов дерева по их частоте
-    struct compareNodes
-    {
-        bool operator()(Node* left, Node* right)
-        {
-            return left->freq > right->freq;
-        }
-    };
+    bool isLeaf() const { return left == nullptr && right == nullptr; }
+};
 
-    // Создание дерева Хаффмана
-    Node* buildHuffmanTree(std::string text)
-    {
-        // Подсчет частоты символов
-        std::unordered_map<char, int> freq;
-        for (char c : text)
-        {
-            freq[c]++;
-        }
+struct comp {
+    bool operator()(Node* l, Node* r) { return l->freq > r->freq; }
+};
 
-        // Создание очереди с приоритетами
-        std::priority_queue<Node*, std::vector<Node*>, compareNodes> pq;
-        for (auto pair : freq)
-        {
-            pq.push(new Node(pair.first, pair.second, nullptr, nullptr));
-        }
+void encode(Node* root, std::string str, std::unordered_map<char, std::string>& huffmanCode) {
+    if (root == nullptr) return;
 
-        // Строим дерево Хаффмана из узлов из очереди
-        while (pq.size() > 1)
-        {
-            Node* left = pq.top();
-            pq.pop();
-            Node* right = pq.top();
-            pq.pop();
-
-            pq.push(new Node('\0', left->freq + right->freq, left, right));
-        }
-
-        return pq.top();
+    if (root->isLeaf()) {
+        huffmanCode[root->ch] = str;
     }
 
-    // Рекурсивно проходим по дереву и записываем кодированный текст в мапу
-    void encode(Node* node, std::string code, std::unordered_map<char, std::string>& encoding)
-    {
-        if (node == nullptr)
-        {
-            return;
-        }
+    encode(root->left, str + "0", huffmanCode);
+    encode(root->right, str + "1", huffmanCode);
+}
 
-        if (node->left == nullptr && node->right == nullptr)
-        {
-            encoding[node->ch] = code;
-        }
-
-        encode(node->left, code + '0', encoding);
-        encode(node->right, code + '1', encoding);
+std::unordered_map<char, std::string> buildHuffmanTree(std::string text) {
+    std::unordered_map<char, int> freq;
+    for (char ch : text) {
+        freq[ch]++;
     }
 
-    // Кодируем текст с помощью дерева Хаффмана и возвращаем строку с битовой записью
-    std::string encodeText(std::string text, std::unordered_map<char, std::string> encoding)
-    {
-        std::string result = "";
-        for (char c : text)
-        {
-            result += encoding[c];
-        }
+    std::priority_queue<Node*, std::vector<Node*>, comp> pq;
 
-        return result;
+    for (auto pair : freq) {
+        pq.push(new Node(pair.first, pair.second));
     }
 
-    // Раскодируем текст, используя дерево Хаффмана
-    std::string decodeText(std::string encodedText, Node* root)
-    {
-        std::string result = "";
-        Node* node = root;
-        for (char bit : encodedText)
-        {
-            if (node->left == nullptr && node->right == nullptr)
-            {
-                result += node->ch;
-                node = root;
-            }
+    while (pq.size() != 1) {
+        Node* left = pq.top();
+        pq.pop();
+        Node* right = pq.top();
+        pq.pop();
 
-            if (bit == '0')
-            {
-                node = node->left;
-            }
-            else
-            {
-                node = node->right;
-            }
-        }
+        int sum = left->freq + right->freq;
+        Node* parent = new Node('\0', sum);
+        parent->left = left;
+        parent->right = right;
 
-        if (node->left == nullptr && node->right == nullptr)
-        {
-            result += node->ch;
-        }
-
-        return result;
+        pq.push(parent);
     }
 
-    // Кодировка файла с помощью алгоритма Хаффмана
-    void encodeFile(std::string inputFile, std::string outputFile)
-    {
-        // Читаем файл
-        std::ifstream in(inputFile, std::ios::binary);
-        std::string text((std::istreambuf_iterator<char>(in)), (std::istreambuf_iterator<char>()));
-        in.close();
+    std::unordered_map<char, std::string> huffmanCode;
+    encode(pq.top(), "", huffmanCode);
 
-        // Создание дерева Хаффмана и таблицы кодировки
-        Node* root = buildHuffmanTree(text);
-        std::unordered_map<char, std::string> encoding;
-        encode(root, "", encoding);
+    return huffmanCode;
+}
 
-        // Кодируем текст и записываем битовую запись в файл
-        std::string encodedText = encodeText(text, encoding);
-        std::ofstream out(outputFile, std::ios::out | std::ios::binary);
-        out.write((char*)&encoding, sizeof(encoding));
-        out.write((char*)&encodedText[0], encodedText.size());
-        out.close();
+std::string compressString(std::string text, std::unordered_map<char, std::string> huffmanCode) {
+    std::string compressedTxt = "";
+    for (char ch : text) {
+        compressedTxt += huffmanCode[ch];
     }
+    return compressedTxt;
+}
 
-    // Раскодировка файла с помощью алгоритма Хаффмана
-    void decodeFile(std::string inputFile, std::string outputFile)
-    {
-        // Читаем файл
-        std::ifstream in(inputFile, std::ios::binary);
-        std::unordered_map<char, std::string> encoding;
-        in.read((char*)&encoding, sizeof(encoding));
-
-        // Создаем
-        // дерево Хаффмана из таблицы кодировки
-        Node* root = new Node('\0', 0, nullptr, nullptr);
-        for (auto pair : encoding)
-        {
-            Node* node = root;
-            for (char bit : pair.second)
-            {
-                if (bit == '0')
-                {
-                    if (node->left == nullptr)
-                    {
-                        node->left = new Node('\0', 0, nullptr, nullptr);
-                    }
-                    node = node->left;
+Node* buildHuffmanTree(std::unordered_map<char, std::string> huffmanCode) {
+    Node* root = new Node('\0', 0);
+    for (auto pair : huffmanCode) {
+        Node* curr = root;
+        std::string code = pair.second;
+        for (char c : code) {
+            if (c == '0') {
+                if (curr->left == nullptr) {
+                    curr->left = new Node('\0', 0);
                 }
-                else
-                {
-                    if (node->right == nullptr)
-                    {
-                        node->right = new Node('\0', 0, nullptr, nullptr);
-                    }
-                    node = node->right;
-                }
+                curr = curr->left;
             }
-            node->ch = pair.first;
+            else {
+                if (curr->right == nullptr) {
+                    curr->right = new Node('\0', 0);
+                }
+                curr = curr->right;
+            }
+        }
+        curr->ch = pair.first;
+    }
+
+    return root;
+}
+
+std::string decompressString(std::string compressedText, Node* root) {
+    std::string decompressedTxt = "";
+    Node* curr = root;
+    for (char c : compressedText) {
+        if (c == '0') {
+            curr = curr->left;
+        }
+        else {
+            curr = curr->right;
         }
 
-        // Раскодируем битовую запись и записываем раскодированный текст в файл
-        std::string encodedText((std::istreambuf_iterator<char>(in)), (std::istreambuf_iterator<char>()));
-        in.close();
-        std::string decodedText = decodeText(encodedText, root);
-        std::ofstream out(outputFile, std::ios::out | std::ios::binary);
-        out.write((char*)&decodedText[0], decodedText.size());
-        out.close();
+        if (curr->isLeaf()) {
+            decompressedTxt += curr->ch;
+            curr = root;
+        }
     }
+
+    return decompressedTxt;
+}
+
+void compressFile(std::string input_text, std::string output_text)
+{
+    std::ifstream f(input_text, std::ios::binary);
+    std::string line;
+    if (f.is_open())
+    {
+        while (std::getline(f, line))
+        {
+            std::cout << line << std::endl;
+        }
+    }
+    f.close();     // закрываем файл
+
+    std::unordered_map<char, std::string> huffmanCode = buildHuffmanTree(line);
+    std::string compressedText = compressString(line, huffmanCode);
+
+    std::ofstream out(output_text, std::ios::binary);
+    if (out.is_open())
+    {
+        out << compressedText << std::endl;
+    }
+    out.close();
+
+    std::cout << "The original text is: " << line << std::endl;
+    std::cout << "The compressed text is: " << compressedText << std::endl;
+}
+
+void decompressFile(std::string input_text, std::string output_text)
+{
+    std::ifstream f(input_text, std::ios::binary);
+    std::string line;
+    if (f.is_open())
+    {
+        std::getline(f, line);
+    }
+    f.close();     // закрываем файл
+
+    std::unordered_map<char, std::string> huffmanCode = buildHuffmanTree(line);
+    std::string compressedText = compressString(line, huffmanCode);
+    Node* root = buildHuffmanTree(huffmanCode);
+    std::string decompressedText = decompressString(compressedText, root);
+
+    std::ofstream out(output_text, std::ios::binary);
+    if (out.is_open())
+    {
+        out << decompressedText << std::endl;
+    }
+    out.close();
+
+    std::cout << "The original text is: " << line << std::endl;
+    std::cout << "The compressed text is: " << compressedText << std::endl;
+    std::cout << "The decompressed text is: " << decompressedText << std::endl;
+}
+
 };
